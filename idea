@@ -1,8 +1,16 @@
-day & night cycle
-command colony 
-colony:
- - autonomous
- - reproduction
- - hunger
- - hp == stamina
- - new abilities unlocked via defeating other colonies
+Save the Queen:
+  - day & night cycle
+  - command colony
+  - colony:
+    - autonomous
+    - reproduction
+    - hunger
+    - hp == stamina
+    - new abilities unlocked via defeating other colonies
+
+
+Boid Commander:
+  - boid squad
+    - autonomous
+    - new abilities unlocked from boss
+    - reproduction

@@ -1,0 +1,34 @@
+Save the Queen
+- scaffold
+- camera
+- static terrain
+- player movement
+- minimap
+- swarming system
+- battle system
+- reproduction system
+- colony spawning system
+- music
+- day & night cycle
+- creature design
+- ability design
+- particles
+- ui
+- intro text
+
+
+Boid Commander
+- scaffold
+- camera
+- static terrain
+- player movement
+- boid system
+- battle system
+- reproduction system
+- enemy spawning system
+- music
+- creature design
+- ability design
+- ui
+- particles
+- intro text
