@@ -1,0 +1,8 @@
+day & night cycle
+command colony 
+colony:
+ - autonomous
+ - reproduction
+ - hunger
+ - hp == stamina
+ - new abilities unlocked via defeating other colonies
