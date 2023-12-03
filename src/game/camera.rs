@@ -15,8 +15,8 @@ pub fn follow_player(
     if let Ok(target_transform) = qry_transform.get_single() {
       cam_transform.translation = Vec3::new(
         target_transform.translation.x,
-        cam_transform.translation.y,
-        target_transform.translation.z,
+        target_transform.translation.y,
+        cam_transform.translation.z,
       );
     }
   }

@@ -68,8 +68,8 @@ pub fn move_moveables(
     let travel = mov.velocity * time.delta_seconds();
     let (new_translation, new_v) = bounds.bounce(trn.translation.xy(), travel.xy());
 
-    let tae = travel / time.delta_seconds();
-    gizmos.ray_2d(trn.translation.xy(), tae.xy(), Color::GREEN);
+    // let tae = travel / time.delta_seconds();
+    // gizmos.ray_2d(trn.translation.xy(), tae.xy(), Color::GREEN);
     // update position
     *trn = trn.with_translation(new_translation.extend(0.0));
     mov.velocity = mov.velocity.length() * new_v.extend(0.0).normalize();
