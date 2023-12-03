@@ -1,0 +1,17 @@
+[package]
+name = "bevy-jam-4"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { workspace = true }
+jam4 = { path = "crates/jam4", version = "0.1.0" }
+base_game = { path = "crates/base_game", version = "0.1.0" }
+utils = { path = "crates/utils", version = "0.1.0" }
+bevy-inspector-egui = "0.21"
+
+[workspace]
+members = ["crates/*"]
+
+[workspace.dependencies]
+bevy = "0.12"
