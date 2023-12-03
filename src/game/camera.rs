@@ -1,4 +1,7 @@
-use bevy::{prelude::*, core_pipeline::{tonemapping::Tonemapping, bloom::BloomSettings}};
+use bevy::{
+  core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+  prelude::*,
+};
 use jam4::Player;
 
 #[derive(Component, Default)]
@@ -6,15 +9,15 @@ pub struct PlayerCamera;
 
 pub fn follow_player(
   qry_transform: Query<&Transform, (With<Player>, Without<Camera>)>,
-  mut qry_camera: Query<
-    (&mut Transform, &mut PlayerCamera),
-    (Without<Player>, With<Camera>),
-  >,
-  time: Res<Time>,
+  mut qry_camera: Query<&mut Transform, (Without<Player>, With<Camera>)>,
 ) {
-  for (mut cam_transform, mut cam) in qry_camera.iter_mut() {
+  for mut cam_transform in qry_camera.iter_mut() {
     if let Ok(target_transform) = qry_transform.get_single() {
-      // TODO
+      cam_transform.translation = Vec3::new(
+        target_transform.translation.x,
+        cam_transform.translation.y,
+        target_transform.translation.z,
+      );
     }
   }
 }

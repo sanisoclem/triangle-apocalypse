@@ -93,7 +93,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
   // so simulation starts at the same time as the splash screen decides to disappear
   commands.spawn(OnSplashScreen).insert(Loading);
 
-  commands.insert_resource(SplashTimer(Timer::from_seconds(3.0, TimerMode::Once)));
+  commands.insert_resource(SplashTimer(Timer::from_seconds(1.0, TimerMode::Once)));
 }
 
 fn mark_loaded(
