@@ -7,7 +7,7 @@ pub mod moveable;
 mod player;
 mod state;
 
-use boid::{calculate_boid_direction, update_boid_velocity};
+use boid::{calculate_boid_direction, update_boid_velocity, BoidConfig};
 pub use components::*;
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
@@ -23,6 +23,7 @@ impl Jam4Extensions for App {
     self
       .init_resource::<ModManager>()
       .init_resource::<MoveableBounds>()
+      .init_resource::<BoidConfig>()
       .add_state::<SimulationState>()
       .add_event::<GameControlCommand>()
       .add_systems(OnExit(SimulationState::Disabled), register_mods)
@@ -34,7 +35,12 @@ impl Jam4Extensions for App {
           process_game_control_commands,
           (
             run_mod_update,
-            (calculate_boid_direction, update_boid_velocity, move_moveables).chain(),
+            (
+              calculate_boid_direction,
+              update_boid_velocity,
+              move_moveables,
+            )
+              .chain(),
           )
             .run_if(in_state(SimulationState::Simulating)),
           wait_until_loading_complete.run_if(in_state(SimulationState::Loading)),

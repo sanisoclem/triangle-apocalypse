@@ -9,6 +9,7 @@ jam4 = { path = "crates/jam4", version = "0.1.0" }
 base_game = { path = "crates/base_game", version = "0.1.0" }
 utils = { path = "crates/utils", version = "0.1.0" }
 bevy-inspector-egui = "0.21"
+bevy_egui = "0.23"
 
 [workspace]
 members = ["crates/*"]

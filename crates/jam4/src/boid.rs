@@ -20,20 +20,50 @@ impl Default for Boid {
   }
 }
 
+#[derive(Resource)]
+pub struct BoidConfig {
+  pub boundary: f32,
+  pub cohesion: f32,
+  pub alignment: f32,
+  pub repulsion: f32,
+  pub lprobe: Quat,
+  pub rprobe: Quat,
+  pub lforce: Quat,
+  pub rforce: Quat,
+  pub show_probes: bool,
+  pub show_forces: bool,
+  pub show_direction: bool,
+}
+
+impl Default for BoidConfig {
+  fn default() -> Self {
+    BoidConfig {
+      boundary: 1.0,
+      cohesion: 1.0,
+      alignment: 1.0,
+      repulsion: 1.0,
+      lprobe: Quat::from_rotation_z(45.0f32.to_radians()),
+      rprobe: Quat::from_rotation_z(-45.0f32.to_radians()),
+      lforce: Quat::from_rotation_z(90.0f32.to_radians()),
+      rforce: Quat::from_rotation_z(-90.0f32.to_radians()),
+      show_probes: false,
+      show_forces: false,
+      show_direction: false,
+    }
+  }
+}
+
 pub fn calculate_boid_direction(
-  bounds: Res<MoveableBounds>,
   mut qry: Query<(Entity, &Transform, &mut Boid)>,
-  time: Res<Time>,
   mut gizmos: Gizmos,
+  bounds: Res<MoveableBounds>,
+  bconfig: Res<BoidConfig>,
+  time: Res<Time>,
 ) {
-  let lrot = Quat::from_rotation_z(45.0f32.to_radians());
-  let rrot = Quat::from_rotation_z(-45.0f32.to_radians());
-  let lrot90 = Quat::from_rotation_z(90.0f32.to_radians());
-  let rrot90 = Quat::from_rotation_z(-90.0f32.to_radians());
   let changes = qry
     .iter()
     .map(|(e, t1, boid)| {
-      if (boid.is_player) {
+      if boid.is_player {
         return (e, Vec3::ZERO, t1.translation);
       }
 
@@ -42,36 +72,36 @@ pub fn calculate_boid_direction(
       let mut separation_force = Vec3::ZERO;
       let mut cohesion_force = Vec3::ZERO;
       let mut alignment_force = Vec3::ZERO;
-      let forcel = lrot90.mul_vec3(boid.direction);
-      let forcer = rrot90.mul_vec3(boid.direction);
-      let rayf = tx + (boid.direction * boid.vision);
-      let rayl = tx + lrot.mul_vec3(boid.direction * boid.vision);
-      let rayr = tx + rrot.mul_vec3(boid.direction * boid.vision);
 
-      // gizmos.ray_2d(
-      //   tx.xy(),
-      //   rrot.mul_vec3(boid.direction).xy() * boid.vision,
-      //   Color::BLUE,
-      // );
-      // gizmos.ray_2d(
-      //   tx.xy(),
-      //   lrot.mul_vec3(boid.direction).xy() * boid.vision,
-      //   Color::RED,
-      // );
+      let rayl: Vec3 = tx + bconfig.lprobe.mul_vec3(boid.direction * boid.vision);
+      let rayr = tx + bconfig.rprobe.mul_vec3(boid.direction * boid.vision);
 
-      let colf = bounds.distance_to_edge(rayf.xy());
+      if (bconfig.show_probes) {
+        gizmos.ray_2d(
+          tx.xy(),
+          bconfig.rprobe.mul_vec3(boid.direction).xy() * boid.vision,
+          Color::RED,
+        );
+        gizmos.ray_2d(
+          tx.xy(),
+          bconfig.lprobe.mul_vec3(boid.direction).xy() * boid.vision,
+          Color::RED,
+        );
+      }
+
+      let colf = bounds.distance_to_edge((boid.direction * boid.vision).xy());
       let coll = bounds.distance_to_edge(rayl.xy());
       let colr = bounds.distance_to_edge(rayr.xy());
       if coll > 0.0 && coll > colr {
+        let forcer = bconfig.rforce.mul_vec3(boid.direction);
         bounds_force += forcer;
-        //gizmos.ray_2d(tx.xy(), forcel.xy() * 500.0, Color::RED);
       } else if colr > 0.0 || colf > 0.0 {
+        let forcel = bconfig.lforce.mul_vec3(boid.direction);
         bounds_force += forcel;
-        // gizmos.ray_2d(tx.xy(), forcer.xy() * 500.0, Color::BLUE);
       }
 
       // find all neighbors of e1
-      for (e2, t2, boid2) in qry.iter() {
+      for (_, t2, boid2) in qry.iter() {
         let neg_diff = tx - t2.translation;
         let diff = t2.translation - tx;
         let ndl = neg_diff.length();
@@ -90,17 +120,23 @@ pub fn calculate_boid_direction(
         }
       }
 
-      let force = (bounds_force * 100.)
-        + (separation_force * 10.)
-        + (alignment_force * 10.)
-        + (cohesion_force * 1.);
+      let force = (bounds_force * bconfig.boundary)
+        + (separation_force * bconfig.repulsion)
+        + (alignment_force * bconfig.alignment)
+        + (cohesion_force * bconfig.cohesion);
+      if (bconfig.show_forces) {
+        gizmos.ray_2d(tx.xy(), tx.xy(), Color::CYAN);
+      }
       (e, force.normalize_or_zero(), tx)
     })
     .collect::<Vec<_>>();
   for (e, f, t) in changes.iter() {
     let (_, _, mut b) = qry.get_mut(*e).unwrap();
     b.direction = (b.direction + (*f * time.delta_seconds() * 3.0)).normalize();
-    gizmos.ray_2d(t.xy(), b.direction.xy() * 100.0, Color::PINK);
+
+    if bconfig.show_direction {
+      gizmos.ray_2d(t.xy(), b.direction.xy() * 100.0, Color::BLUE);
+    }
   }
 }
 

@@ -412,6 +412,7 @@ dependencies = [
  "base_game",
  "bevy",
  "bevy-inspector-egui",
+ "bevy_egui",
  "jam4",
  "utils",
 ]

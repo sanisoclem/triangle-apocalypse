@@ -1,8 +1,12 @@
 use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts};
 use camera::*;
 use music::*;
 
-use jam4::{boid::Boid, Player, SimulationState};
+use jam4::{
+  boid::{Boid, BoidConfig},
+  Player, SimulationState,
+};
 mod camera;
 mod music;
 
@@ -18,7 +22,8 @@ impl GameExtensions for App {
       .add_systems(OnEnter(game_state), (setup_music, setup_camera))
       .add_systems(
         Update,
-        (calc_player_direction, follow_player).run_if(in_state(SimulationState::Simulating)),
+        (calc_player_direction, follow_player, boid_config)
+          .run_if(in_state(SimulationState::Simulating)),
       )
     //     .add_player_camera()
     //     .add_music()
@@ -44,21 +49,20 @@ pub fn calc_player_direction(
   }
 }
 
-// pub fn move_player(
-//   mut qry: Query<(&mut Moveable, &mut Transform, &Player)>,
-//   mut gizmos: Gizmos,
-// ) {
-//   if let Ok((mut mov, mut t, p)) = qry.get_single_mut() {
-//     let normalized = if p.direction == Vec3::ZERO {
-//       Vec3::Y
-//     } else {
-//       p.direction.normalize()
-//     };
-
-//     t.rotation = Quat::from_rotation_z( p.direction.x.signum() * -1. * p.direction.angle_between(Vec3::Y));
-//     gizmos.ray_2d(t.translation.xy(), p.direction.xy() * 100.0, Color::BLUE);
-
-//     // TODO: move constant velocity to boid
-//     mov.velocity = normalized * 250.0;
-//   }
-// }
+fn boid_config(mut config: ResMut<BoidConfig>, mut contexts: EguiContexts) {
+  egui::Window::new("Boid Config").show(contexts.ctx_mut(), |ui| {
+    ui.add(egui::Slider::new(&mut config.cohesion, 0.0..=1.0).text("Cohesion"));
+    ui.add(egui::Slider::new(&mut config.alignment, 0.0..=1.0).text("Alignment"));
+    ui.add(egui::Slider::new(&mut config.repulsion, 0.0..=1.0).text("Repulsion"));
+    ui.add(egui::Slider::new(&mut config.boundary, 0.0..=1.0).text("Boundary"));
+    ui.add(egui::Checkbox::new(
+      &mut config.show_direction,
+      "Show Direction",
+    ));
+    ui.add(egui::Checkbox::new(&mut config.show_forces, "Show Forces"));
+    ui.add(egui::Checkbox::new(
+      &mut config.show_probes,
+      "Show Show Probes",
+    ));
+  });
+}
