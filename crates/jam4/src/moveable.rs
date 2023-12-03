@@ -14,13 +14,24 @@ pub enum MoveableBounds {
 }
 
 impl MoveableBounds {
+  pub fn distance_to_edge(&self, p: Vec2) -> f32 {
+    match self {
+      MoveableBounds::Box(e) => {
+        let d  =  p.abs() - *e;
+        d.max(Vec2::ZERO).length() + d.x.max(d.y).min(0.0)
+      },
+      _ => unimplemented!(),
+    }
+  }
   pub fn get_closest_point(&self, p: Vec2) -> Vec2 {
     match self {
       MoveableBounds::Box(e) => {
+        // let diff = (e.x - e.y);
+        // let d2 = Vec2::new()
         if p.x.abs() > p.y.abs() {
-          Vec2::new(e.x * (p.x / p.x.abs()), p.y.clamp(e.y * -1.0, e.y))
+          Vec2::new(e.x * p.x.signum(), p.y.clamp(e.y * -1.0, e.y))
         } else {
-          Vec2::new(p.x.clamp(e.x * -1.0, e.x), e.y * (p.y / p.y.abs()))
+          Vec2::new(p.x.clamp(e.x * -1.0, e.x), e.y * p.y.signum())
         }
       }
       _ => unimplemented!(),

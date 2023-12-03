@@ -1,7 +1,8 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use jam4::{
+  boid::Boid,
   moveable::{Moveable, MoveableBounds},
-  GameModuleDescriptor, NativeGameModule, Player, boid::Boid,
+  GameModuleDescriptor, NativeGameModule, Player,
 };
 
 pub fn get_module() -> GameModuleDescriptor {
@@ -46,32 +47,34 @@ pub fn on_setup(
     })
     .insert(Player);
 
-  for x in 0..50 {
-    let rot = Quat::from_rotation_z(x as f32);
-    cmd
-      .spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(shape::RegularPolygon::new(5., 3).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 10.0, 7.5))),
-        transform: Transform::from_rotation(rot).with_translation(Vec3::new(10.0 + (x as f32) * 5., 0., 0.))
-          ,//.with_rotation(rot),
-        ..default()
-      })
-      .insert(Moveable {
-        velocity: rot.mul_vec3(Vec3::NEG_Y * 250.),
-      });
-  }
-
   // for x in 0..50 {
+  //   let rot = Quat::from_rotation_z(x as f32);
   //   cmd
   //     .spawn(MaterialMesh2dBundle {
   //       mesh: meshes.add(shape::RegularPolygon::new(5., 3).into()).into(),
   //       material: materials.add(ColorMaterial::from(Color::rgb(0.5, 10.0, 7.5))),
-  //       transform: Transform::from_translation(Vec3::new(10.0 + (x as f32) * 5., 0., 0.)),
+  //       transform: Transform::from_rotation(rot).with_translation(Vec3::new(10.0 + (x as f32) * 5., 0., 0.))
+  //         ,//.with_rotation(rot),
   //       ..default()
   //     })
-  //     .insert(Moveable::default())
-  //     .insert(Boid::default());
+  //     .insert(Moveable {
+  //       velocity: rot.mul_vec3(Vec3::NEG_Y * 250.),
+  //     });
   // }
+
+  for x in 0..50 {
+    cmd
+      .spawn(MaterialMesh2dBundle {
+        mesh: meshes.add(shape::RegularPolygon::new(5., 3).into()).into(),
+        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 10.0, 7.5))),
+        transform: Transform::from_translation(Vec3::new(10.0 + (x as f32) * 5., 0., 0.)),
+        ..default()
+      })
+      .insert(Moveable::default())
+      .insert(Boid::default());
+  }
 }
 
-pub fn some_system(_qry: Query<Entity>) {}
+pub fn some_system(_qry: Query<Entity>, mut gizmos: Gizmos) {
+  gizmos.rect_2d(Vec2::ZERO, 0.0, Vec2::new(1000., 600.), Color::GREEN)
+}
