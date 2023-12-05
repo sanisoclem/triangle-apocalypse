@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 jam4 = { path = "../jam4", version = "0.1.0" }
+sdfu = { workspace = true }
+bevy_smud = { workspace = true }

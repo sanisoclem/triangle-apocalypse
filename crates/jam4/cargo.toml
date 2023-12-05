@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
+sdfu = { workspace = true }
+bevy_smud = { workspace = true }

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_smud::SmudPlugin;
 
 pub mod boid;
 mod components;
@@ -7,7 +8,7 @@ pub mod moveable;
 mod player;
 mod state;
 
-use boid::{calculate_boid_direction, update_boid_velocity, BoidConfig};
+use boid::{calculate_boid_direction, update_boid_velocity, BoidConfig, draw_boid_gizmos};
 pub use components::*;
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
@@ -21,6 +22,7 @@ pub trait Jam4Extensions {
 impl Jam4Extensions for App {
   fn add_jam_game(&mut self) -> &mut Self {
     self
+      .add_plugins(SmudPlugin)
       .init_resource::<ModManager>()
       .init_resource::<MoveableBounds>()
       .init_resource::<BoidConfig>()
@@ -35,6 +37,7 @@ impl Jam4Extensions for App {
           process_game_control_commands,
           (
             run_mod_update,
+            draw_boid_gizmos,
             (
               calculate_boid_direction,
               update_boid_velocity,

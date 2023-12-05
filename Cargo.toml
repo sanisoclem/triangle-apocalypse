@@ -15,4 +15,6 @@ bevy_egui = "0.23"
 members = ["crates/*"]
 
 [workspace.dependencies]
+sdfu = { path="crates/sdfu", version = "0.3.1-alpha.1", features = ["glam"] }
 bevy = "0.12"
+bevy_smud = "0.7"
