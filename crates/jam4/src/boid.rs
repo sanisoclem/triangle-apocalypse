@@ -13,8 +13,8 @@ impl Default for Boid {
   fn default() -> Self {
     Boid {
       direction: Vec3::Y,
-      vision: 100.0,
-      personal_space: 10.0,
+      vision: 200.0,
+      personal_space: 30.0,
       is_player: false,
     }
   }
@@ -37,14 +37,15 @@ pub struct BoidConfig {
   pub show_personal_space: bool,
   pub show_vision: bool,
   pub show_bounds: bool,
+  pub turn_rate: f32,
 }
 
 impl Default for BoidConfig {
   fn default() -> Self {
     BoidConfig {
-      boid_speed: 250.,
-      player_boid_speed: 300.,
-      boundary: 100.0,
+      boid_speed: 500.,
+      player_boid_speed: 600.,
+      boundary: 1000.0,
       cohesion: 0.001,
       alignment: 0.5,
       repulsion: 100.0,
@@ -57,6 +58,7 @@ impl Default for BoidConfig {
       show_personal_space: false,
       show_vision: false,
       show_bounds: true,
+      turn_rate: 10.,
     }
   }
 }
@@ -95,23 +97,25 @@ pub fn calculate_boid_direction(
       }
 
       let tx = t1.translation;
+      let v = boid.direction * boid.vision;
+      let tx2 = tx + v;
       let mut bounds_force = Vec3::ZERO;
       let mut separation_force = Vec3::ZERO;
       let mut cohesion_force = Vec3::ZERO;
       let mut alignment_force = Vec3::ZERO;
 
-      let rayl: Vec3 = tx + bconfig.lprobe.mul_vec3(boid.direction * boid.vision);
-      let rayr = tx + bconfig.rprobe.mul_vec3(boid.direction * boid.vision);
+      let rayl: Vec3 = tx + bconfig.lprobe.mul_vec3(v);
+      let rayr = tx + bconfig.rprobe.mul_vec3(v);
 
-      let colf = bounds.distance_to_edge((boid.direction * boid.vision).xy());
+      let colf = bounds.distance_to_edge(tx2.xy());
       let coll = bounds.distance_to_edge(rayl.xy());
       let colr = bounds.distance_to_edge(rayr.xy());
       if coll < 0.0 && coll < colr {
-        let forcer = bconfig.rforce.mul_vec3(boid.direction);
-        bounds_force += forcer;
-      } else if colr < 0.0 || colf < 0.0 {
-        let forcel = bconfig.lforce.mul_vec3(boid.direction);
-        bounds_force += forcel;
+        bounds_force += bconfig.rforce.mul_vec3(boid.direction);
+      } else if colr < 0.0 {
+        bounds_force += bconfig.lforce.mul_vec3(boid.direction);
+      } else if colf < 0.0 {
+        bounds_force += bounds.edge_normal(tx2.xy()).extend(0.)
       }
 
       // find all neighbors of e1
@@ -146,7 +150,7 @@ pub fn calculate_boid_direction(
     .collect::<Vec<_>>();
   for (e, f, t) in changes.iter() {
     let (_, _, mut b) = qry.get_mut(*e).unwrap();
-    b.direction = (b.direction + (*f * time.delta_seconds() * 3.0)).normalize();
+    b.direction = (b.direction + (*f * time.delta_seconds() * bconfig.turn_rate)).normalize();
 
     if bconfig.show_direction {
       gizmos.ray_2d(t.xy(), b.direction.xy() * 100.0, Color::BLUE);

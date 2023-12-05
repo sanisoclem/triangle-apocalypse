@@ -43,6 +43,12 @@ impl MoveableBounds {
       MoveableBounds::Sdf(sdf) => sdf.sdf.dist(p),
     }
   }
+  pub fn edge_normal(&self, p: Vec2) -> Vec2 {
+    match self {
+      MoveableBounds::None => Vec2::ZERO,
+      MoveableBounds::Sdf(sdf) => sdf.normals.normal_at(p),
+    }
+  }
 
   pub fn bounce(&self, o: Vec2, p: Vec2) -> (Vec2, Vec2) {
     let op = o + p;
@@ -52,6 +58,8 @@ impl MoveableBounds {
         let d = self.distance_to_edge(op);
         if d > 0.0 {
           (op, p)
+        } else if true {
+          (o ,p)
         } else {
           let incident = p.normalize();
           let normal = sdf.normals.normal_at(op);
@@ -89,6 +97,6 @@ pub fn move_moveables(
 
     // update position
     *trn = trn.with_translation(new_translation.extend(0.0));
-    mov.velocity = mov.velocity.length() * new_v.extend(0.0).normalize();
+    //mov.velocity = mov.velocity.length() * new_v.extend(0.0).normalize();
   }
 }

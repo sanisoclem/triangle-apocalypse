@@ -54,7 +54,10 @@ fn boid_config(mut config: ResMut<BoidConfig>, mut contexts: EguiContexts) {
     ui.add(egui::Slider::new(&mut config.cohesion, 0.0..=1.0).text("Cohesion"));
     ui.add(egui::Slider::new(&mut config.alignment, 0.0..=1.0).text("Alignment"));
     ui.add(egui::Slider::new(&mut config.repulsion, 0.0..=100.0).text("Repulsion"));
-    ui.add(egui::Slider::new(&mut config.boundary, 0.0..=100.0).text("Boundary"));
+    ui.add(egui::Slider::new(&mut config.boundary, 0.0..=1000.0).text("Boundary"));
+    ui.add(egui::Slider::new(&mut config.boid_speed, 0.0..=1000.0).text("Speed"));
+    ui.add(egui::Slider::new(&mut config.player_boid_speed, 0.0..=1000.0).text("Player Speed"));
+    ui.add(egui::Slider::new(&mut config.turn_rate, 0.0..=100.0).text("Turn Rate"));
     ui.add(egui::Checkbox::new(
       &mut config.show_direction,
       "Show Direction",
