@@ -4,7 +4,7 @@ use crate::moveable::{Moveable, MoveableBounds};
 
 #[derive(Component)]
 pub struct Boid {
-  pub direction: Vec3,
+  pub direction: Vec2,
   pub vision: f32,
   pub personal_space: f32,
   pub is_player: bool,
@@ -12,7 +12,7 @@ pub struct Boid {
 impl Default for Boid {
   fn default() -> Self {
     Boid {
-      direction: Vec3::Y,
+      direction: Vec2::Y,
       vision: 200.0,
       personal_space: 30.0,
       is_player: false,
@@ -28,10 +28,10 @@ pub struct BoidConfig {
   pub cohesion: f32,
   pub alignment: f32,
   pub repulsion: f32,
-  pub lprobe: Quat,
-  pub rprobe: Quat,
-  pub lforce: Quat,
-  pub rforce: Quat,
+  pub lprobe: Mat2,
+  pub rprobe: Mat2,
+  pub lforce: Mat2,
+  pub rforce: Mat2,
   pub show_forces: bool,
   pub show_direction: bool,
   pub show_personal_space: bool,
@@ -49,10 +49,10 @@ impl Default for BoidConfig {
       cohesion: 0.001,
       alignment: 0.5,
       repulsion: 100.0,
-      lprobe: Quat::from_rotation_z(45.0f32.to_radians()),
-      rprobe: Quat::from_rotation_z(-45.0f32.to_radians()),
-      lforce: Quat::from_rotation_z(90.0f32.to_radians()),
-      rforce: Quat::from_rotation_z(-90.0f32.to_radians()),
+      lprobe: Mat2::from_angle(45.0f32.to_radians()),
+      rprobe: Mat2::from_angle(-45.0f32.to_radians()),
+      lforce: Mat2::from_angle(90.0f32.to_radians()),
+      rforce: Mat2::from_angle(-90.0f32.to_radians()),
       show_forces: false,
       show_direction: false,
       show_personal_space: false,
@@ -93,41 +93,44 @@ pub fn calculate_boid_direction(
     .iter()
     .map(|(e, t1, boid)| {
       if boid.is_player {
-        return (e, Vec3::ZERO, t1.translation);
+        return (e, Vec2::ZERO, t1.translation);
       }
 
-      let tx = t1.translation;
-      let v = boid.direction * boid.vision;
+      // TODO: extract/BAP
+      let tx = t1.translation.xy();
+      let v = boid.direction.xy() * boid.vision;
       let tx2 = tx + v;
-      let mut bounds_force = Vec3::ZERO;
-      let mut separation_force = Vec3::ZERO;
-      let mut cohesion_force = Vec3::ZERO;
-      let mut alignment_force = Vec3::ZERO;
+      let mut bounds_force = Vec2::ZERO;
+      let mut separation_force = Vec2::ZERO;
+      let mut cohesion_force = Vec2::ZERO;
+      let mut alignment_force = Vec2::ZERO;
 
-      let rayl: Vec3 = tx + bconfig.lprobe.mul_vec3(v);
-      let rayr = tx + bconfig.rprobe.mul_vec3(v);
+      let rayl = tx + bconfig.lprobe.mul_vec2(v);
+      let rayr = tx + bconfig.rprobe.mul_vec2(v);
 
-      let colf = bounds.distance_to_edge(tx2.xy());
-      let coll = bounds.distance_to_edge(rayl.xy());
-      let colr = bounds.distance_to_edge(rayr.xy());
+      let colf = bounds.distance_to_edge(tx2);
+      let coll = bounds.distance_to_edge(rayl);
+      let colr = bounds.distance_to_edge(rayr);
       if coll < 0.0 && coll < colr {
-        bounds_force += bconfig.rforce.mul_vec3(boid.direction);
+        bounds_force += bconfig.rforce.mul_vec2(boid.direction);
       } else if colr < 0.0 {
-        bounds_force += bconfig.lforce.mul_vec3(boid.direction);
+        bounds_force += bconfig.lforce.mul_vec2(boid.direction);
       } else if colf < 0.0 {
-        bounds_force += bounds.edge_normal(tx2.xy()).extend(0.)
+        bounds_force += bounds.edge_normal(tx2)
       }
 
       // find all neighbors of e1
-      for (_, t2, boid2) in qry.iter() {
-        let neg_diff = tx - t2.translation;
-        let diff = t2.translation - tx;
-        let ndl = neg_diff.length();
-        if ndl < boid.personal_space {
-          let m2 = (boid.personal_space - ndl) / boid.personal_space;
-          separation_force += neg_diff * m2;
-        } else if ndl < boid.vision {
-          let m3 = (boid.vision - ndl) / boid.vision;
+      for (_, t_other, boid2) in qry.iter() {
+        let tx_other = t_other.translation.xy();
+
+        let diff = tx_other - tx;
+        let dist = diff.length();
+        if dist < boid.personal_space {
+          let m2 = (boid.personal_space - dist) / boid.personal_space;
+          separation_force += -diff * m2;
+        } else if dist < boid.vision {
+          // TODO: customize falloff curve
+          let m3 = (boid.vision - dist) / boid.vision;
           cohesion_force += diff * m3;
           alignment_force += boid2.direction * m3;
         } else {
@@ -142,10 +145,10 @@ pub fn calculate_boid_direction(
         .normalize_or_zero();
 
       if bconfig.show_forces {
-        gizmos.ray_2d(tx.xy(), force.xy() * boid.vision, Color::CYAN);
+        gizmos.ray_2d(tx, force.xy() * boid.vision, Color::CYAN);
       }
 
-      (e, force, tx)
+      (e, force, t1.translation)
     })
     .collect::<Vec<_>>();
   for (e, f, t) in changes.iter() {
@@ -153,7 +156,7 @@ pub fn calculate_boid_direction(
     b.direction = (b.direction + (*f * time.delta_seconds() * bconfig.turn_rate)).normalize();
 
     if bconfig.show_direction {
-      gizmos.ray_2d(t.xy(), b.direction.xy() * 100.0, Color::BLUE);
+      gizmos.ray_2d(t.xy(), b.direction * 100.0, Color::BLUE);
     }
   }
 }
@@ -163,15 +166,14 @@ pub fn update_boid_velocity(
   bconfig: Res<BoidConfig>,
 ) {
   for (mut mov, mut t, boid) in qry.iter_mut() {
-    let normalized = if boid.direction == Vec3::ZERO {
+    let normalized = if boid.direction == Vec2::ZERO {
       Vec3::Y
     } else {
-      boid.direction.normalize()
+      boid.direction.extend(0.0).normalize()
     };
 
-    t.rotation = Quat::from_rotation_z(
-      boid.direction.x.signum() * -1. * boid.direction.angle_between(Vec3::Y),
-    );
+    t.rotation =
+      Quat::from_rotation_z(normalized.x.signum() * -1. * normalized.angle_between(Vec3::Y));
 
     if boid.is_player {
       mov.velocity = normalized * bconfig.player_boid_speed;

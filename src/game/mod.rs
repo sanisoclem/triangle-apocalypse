@@ -37,15 +37,15 @@ pub fn calc_player_direction(
   time: Res<Time>,
 ) {
   if let Ok(mut p) = qry.get_single_mut() {
-    let mut turning_force = Vec3::ZERO;
+    let mut turning_force = Vec2::ZERO;
 
     if keyboard_input.pressed(KeyCode::A) {
-      turning_force += Quat::from_rotation_z(90.0f32.to_radians()).mul_vec3(p.direction);
+      turning_force += Mat2::from_angle(90.0f32.to_radians()).mul_vec2(p.direction);
     } else if keyboard_input.pressed(KeyCode::D) {
-      turning_force += Quat::from_rotation_z(-90.0f32.to_radians()).mul_vec3(p.direction);
+      turning_force += Mat2::from_angle(-90.0f32.to_radians()).mul_vec2(p.direction);
     }
 
-    p.direction = (p.direction + (turning_force * time.delta_seconds() * 3.0)).normalize();
+    p.direction = (p.direction + (turning_force * time.delta_seconds() * 6.0)).normalize();
   }
 }
 
@@ -67,13 +67,7 @@ fn boid_config(mut config: ResMut<BoidConfig>, mut contexts: EguiContexts) {
       &mut config.show_personal_space,
       "Show Personal Space",
     ));
-    ui.add(egui::Checkbox::new(
-      &mut config.show_vision,
-      "Show Vision",
-    ));
-    ui.add(egui::Checkbox::new(
-      &mut config.show_bounds,
-      "Show Bounds",
-    ));
+    ui.add(egui::Checkbox::new(&mut config.show_vision, "Show Vision"));
+    ui.add(egui::Checkbox::new(&mut config.show_bounds, "Show Bounds"));
   });
 }

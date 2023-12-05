@@ -58,9 +58,9 @@ pub fn on_setup(
 
   cmd
     .spawn(MaterialMesh2dBundle {
-      mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
-      material: materials.add(ColorMaterial::from(Color::rgb(7.5, 0.0, 7.5))),
-      transform: Transform::from_translation(Vec3::new(0., 0., 0.)),
+      mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
+      material: materials.add(ColorMaterial::from(Color::rgb(17.5, 0.0, 7.5))),
+      transform: Transform::from_translation(Vec3::new(0., 0., -100.0)).with_scale(Vec3::new(1.0,2.0,1.0)),
       ..default()
     })
     .insert(Player::default())
@@ -73,12 +73,12 @@ pub fn on_setup(
       ..default()
     });
 
-  for x in -515..515 {
+  for x in -1515..1515 {
     cmd
       .spawn(MaterialMesh2dBundle {
         mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 1.0, 0.5))),
-        transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.)),
+        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
+        transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.)).with_scale(Vec3::new(1.0,2.0,1.0)),
         ..default()
       })
       .insert(Moveable::default())
