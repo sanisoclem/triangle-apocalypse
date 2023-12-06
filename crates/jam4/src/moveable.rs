@@ -1,4 +1,4 @@
-use std::{default, sync::Arc};
+use std::sync::Arc;
 
 use bevy::prelude::*;
 use sdfu::{
@@ -59,13 +59,13 @@ impl MoveableBounds {
         if d > 0.0 {
           (op, p)
         } else if true {
-          (o ,p)
+          (o, p)
         } else {
           let incident = p.normalize();
           let normal = sdf.normals.normal_at(op);
           let angle = (90.0f32.to_radians() - normal.angle_between(incident)) * 2.0;
           let newp = Quat::from_rotation_z(angle).mul_vec3(p.extend(0.)).xy();
-          if sdf.sdf.dist(o + newp) < 0.{
+          if sdf.sdf.dist(o + newp) < 0. {
             return (o, p);
           }
           (o + newp, newp)
@@ -79,24 +79,14 @@ pub fn move_moveables(
   bounds: Res<MoveableBounds>,
   mut qry: Query<(&mut Transform, &mut Moveable)>,
   time: Res<Time>,
-  mut gizmos: Gizmos,
 ) {
   for (mut trn, mut mov) in qry.iter_mut() {
     // calculate next position
     let travel = mov.velocity * time.delta_seconds();
     let (new_translation, new_v) = bounds.bounce(trn.translation.xy(), travel.xy());
 
-    // let dist = bounds.distance_to_edge(trn.translation.xy());
-    // if dist > 0. {
-    //   gizmos.circle_2d(trn.translation.xy(), dist, Color::RED);
-    // } else {
-    //   gizmos.circle_2d(trn.translation.xy(), dist, Color::BLUE);
-    // }
-
-    //gizmos.ray_2d(trn.translation.xy(), mov.velocity.xy() * 100., Color::RED);
-
     // update position
     *trn = trn.with_translation(new_translation.extend(0.0));
-    //mov.velocity = mov.velocity.length() * new_v.extend(0.0).normalize();
+    mov.velocity = mov.velocity.length() * new_v.extend(0.0).normalize();
   }
 }

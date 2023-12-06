@@ -125,7 +125,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
           )
           .with_style(Style {
-            margin: UiRect::all(Val::Px(20.0)),
+            margin: UiRect::top(Val::Px(50.0)),
             ..default()
           }),
         )

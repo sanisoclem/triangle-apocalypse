@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 
 pub struct TextAnimationPlugin;
@@ -14,21 +12,7 @@ impl Plugin for TextAnimationPlugin {
 pub struct TextAnimation {
   pub text: String,
   pub animation_speed: f32,
-  // pub animation_type: ?,
-  // pub easing_func: ?
 }
-
-// pub struct ScriptSegment {
-//   pub text: String,
-//   pub animation_speed: f32,
-//   pub display_for_seconds: f32,
-// }
-// pub enum ScriptTransitionType {
-//   Keyboard(KeyCode),
-//   Click(MouseButton),
-//   KeyboardOrClick(KeyCode, MouseButton),
-//   Duration(Duration)
-// }
 
 #[derive(Component)]
 pub struct AnimatingText {
