@@ -74,7 +74,7 @@ pub fn on_setup(
       ..default()
     });
 
-  for x in -515..515 {
+  for x in -15..15 {
     cmd
       .spawn(MaterialMesh2dBundle {
         mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),

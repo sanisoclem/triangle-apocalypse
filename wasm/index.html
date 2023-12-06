@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      canvas {
+        background-color: white;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sun: {
+                50: "hsl(51, 100%, 96%)",
+                100: "hsl(51, 93%, 89%)",
+                200: "hsl(50, 95%, 77%)",
+                300: "hsl(48, 94%, 65%)",
+                400: "hsl(45, 95%, 56%)",
+                500: "hsl(40, 90%, 51%)",
+                600: "hsl(34, 93%, 44%)",
+                700: "hsl(28, 88%, 37%)",
+                800: "hsl(24, 81%, 31%)",
+                900: "hsl(24, 76%, 26%)",
+                950: "hsl(23, 89%, 14%)",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="flex justify-center items-center bg-gradient-to-t from-sun-500 to-sun-200 h-screen">
+    <button id="start" class="text-sun-950 bg-sun-100 rounded px-4 py-1 font-semibold hover:text-white hover:bg-sun-800 transition-colors">Start Game</button>
+  </body>
+  <script type="module">
+    import init, { main_wasm } from "./target/jam4.js";
+    document.getElementById("start").onclick = async () => {
+      setTimeout(() => {
+        document.getElementById("start").remove();
+      }, 100);
+      await init();
+    };
+  </script>
+</html>

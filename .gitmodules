@@ -1,3 +1,0 @@
-[submodule "crates/sdfu"]
-	path = crates/sdfu
-	url = git@github.com:fu5ha/sdfu.git

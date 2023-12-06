@@ -14,6 +14,17 @@ enum AppState {
 mod game;
 mod splash;
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
+//mod audio;
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn main_wasm() {
+    main();
+}
+
 fn main() {
   App::new()
     .add_plugins(DefaultPlugins)

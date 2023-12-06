@@ -417,6 +417,7 @@ dependencies = [
  "bevy_egui",
  "jam4",
  "utils",
+ "wasm-bindgen",
 ]
 
 [[package]]
