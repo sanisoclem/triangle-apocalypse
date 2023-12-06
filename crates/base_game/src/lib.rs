@@ -28,8 +28,8 @@ fn register_update(sched: &mut Schedule) {
 }
 
 pub fn on_init(mut bounds: ResMut<MoveableBounds>) {
-  let outer = sdfu::Box::new(Vec2::new(2000., 4000.));
-  let inner = sdfu::Box::new(Vec2::new(1000., 3000.));
+  let outer = sdfu::Box::new(Vec2::new(3000., 10000.));
+  let inner = sdfu::Box::new(Vec2::new(2000., 9000.));
   let m1 = sdfu::Circle::new(200.0).translate(Vec2::new(300., 200.));
   let m2 = sdfu::Circle::new(150.).translate(Vec2::new(-200., 300.));
   let m3 = sdfu::Circle::new(125.).translate(Vec2::new(300., -300.));
@@ -70,10 +70,11 @@ pub fn on_setup(
     })
     .insert(Boid {
       is_player: true,
+      personal_space: 100.,
       ..default()
     });
 
-  for x in -1515..1515 {
+  for x in -515..515 {
     cmd
       .spawn(MaterialMesh2dBundle {
         mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),

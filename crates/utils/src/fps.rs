@@ -128,21 +128,37 @@ fn extract_fps(diagnostics: &DiagnosticsStore) -> Option<f64> {
     .and_then(|fps| fps.average())
 }
 
-fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_text(mut commands: Commands) {
   commands
-    .spawn(TextBundle {
-      text: Text {
-        sections: vec![TextSection {
-          value: STRING_INITIAL.to_string(),
-          style: TextStyle {
-            font_size: FONT_SIZE,
-            color: FONT_COLOR,
-            ..default()
-          },
-        }],
+    .spawn((
+      NodeBundle {
+        style: Style {
+          align_items: AlignItems::End,
+          justify_content: JustifyContent::Center,
+          width: Val::Percent(100.0),
+          height: Val::Percent(100.0),
+          ..default()
+        },
         ..default()
       },
-      ..default()
-    })
-    .insert(ScreenDiagsText);
+    ))
+    .with_children(|parent| {
+      parent
+        .spawn(TextBundle {
+          text: Text {
+            sections: vec![TextSection {
+              value: STRING_INITIAL.to_string(),
+              style: TextStyle {
+                font_size: FONT_SIZE,
+                color: FONT_COLOR,
+                ..default()
+              },
+            }],
+            alignment: TextAlignment::Right,
+            ..default()
+          },
+          ..default()
+        })
+        .insert(ScreenDiagsText);
+    });
 }

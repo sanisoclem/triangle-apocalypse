@@ -13,8 +13,8 @@ impl Default for Boid {
   fn default() -> Self {
     Boid {
       direction: Vec2::Y,
-      vision: 200.0,
-      personal_space: 30.0,
+      vision: 400.0,
+      personal_space: 50.0,
       is_player: false,
     }
   }
@@ -38,17 +38,19 @@ pub struct BoidConfig {
   pub show_vision: bool,
   pub show_bounds: bool,
   pub turn_rate: f32,
+  pub player_influence: f32,
 }
 
 impl Default for BoidConfig {
   fn default() -> Self {
     BoidConfig {
       boid_speed: 500.,
+      player_influence: 10.,
       player_boid_speed: 600.,
-      boundary: 1000.0,
-      cohesion: 0.001,
-      alignment: 0.5,
-      repulsion: 100.0,
+      boundary: 5.0,
+      cohesion: 1.0,
+      alignment: 1.0,
+      repulsion: 10.0,
       lprobe: Mat2::from_angle(45.0f32.to_radians()),
       rprobe: Mat2::from_angle(-45.0f32.to_radians()),
       lforce: Mat2::from_angle(90.0f32.to_radians()),
@@ -122,26 +124,32 @@ pub fn calculate_boid_direction(
       // find all neighbors of e1
       for (_, t_other, boid2) in qry.iter() {
         let tx_other = t_other.translation.xy();
-
+        let factor = if boid2.is_player {
+          bconfig.player_influence
+        } else {
+          1.0
+        };
         let diff = tx_other - tx;
         let dist = diff.length();
-        if dist < boid.personal_space {
-          let m2 = (boid.personal_space - dist) / boid.personal_space;
-          separation_force += -diff * m2;
+        let maxpspace = boid.personal_space.max(boid2.personal_space);
+        let mag_pspace = dist / maxpspace;
+        let mag_vision = dist / boid.vision;
+
+        if dist < boid.personal_space || dist < boid2.personal_space {
+          separation_force += -diff * (1.0 - mag_pspace) * factor;
         } else if dist < boid.vision {
           // TODO: customize falloff curve
-          let m3 = (boid.vision - dist) / boid.vision;
-          cohesion_force += diff * m3;
-          alignment_force += boid2.direction * m3;
+          cohesion_force += diff;
+          alignment_force += boid2.direction * (1.0 - mag_vision) * factor;
         } else {
           continue;
         }
       }
 
-      let force = ((bounds_force * bconfig.boundary)
-        + (separation_force * bconfig.repulsion)
-        + (alignment_force * bconfig.alignment)
-        + (cohesion_force * bconfig.cohesion))
+      let force = ((bounds_force.normalize_or_zero() * bconfig.boundary)
+        + (separation_force.normalize_or_zero() * bconfig.repulsion)
+        + (alignment_force.normalize_or_zero() * bconfig.alignment)
+        + (cohesion_force.normalize_or_zero() * bconfig.cohesion))
         .normalize_or_zero();
 
       if bconfig.show_forces {

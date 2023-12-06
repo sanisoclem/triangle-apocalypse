@@ -1,0 +1,43 @@
+thread 'rustc' panicked at /rustc/0e2dac8375950a12812ec65868e42b43ed214ef9\compiler\rustc_errors\src\lib.rs:1653:9:
+Box<dyn Any>
+stack backtrace:
+   0:     0x7ffd2467ddff - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   1:     0x7ffd2467dd64 - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   2:     0x7ffcfde7c809 - <tracing_subscriber[ffa68c423620bd77]::util::TryInitError as core[af6b10dabc404445]::fmt::Display>::fmt
+   3:     0x7ffd24696ea3 - std::panicking::rust_panic_with_hook::hf41a427add849925
+   4:     0x7ffcff1c96f8 - <rustc_middle[2a0a5cf741684306]::ty::instance::Instance as rustc_middle[2a0a5cf741684306]::ty::context::Lift>::lift_to_tcx
+   5:     0x7ffcff1c6929 - <rustc_middle[2a0a5cf741684306]::ty::instance::Instance as rustc_middle[2a0a5cf741684306]::ty::context::Lift>::lift_to_tcx
+   6:     0x7ffcff1f8bb9 - rustc_middle[2a0a5cf741684306]::query::descs::cross_crate_inlinable
+   7:     0x7ffcff1aff60 - <rustc_middle[2a0a5cf741684306]::ty::VariantFlags as core[af6b10dabc404445]::fmt::Debug>::fmt
+   8:     0x7ffcff1af378 - <rustc_middle[2a0a5cf741684306]::ty::VariantFlags as core[af6b10dabc404445]::fmt::Debug>::fmt
+   9:     0x7ffcff1bf73d - rustc_middle[2a0a5cf741684306]::util::bug::bug_fmt
+  10:     0x7ffcff1bec7d - <rustc_middle[2a0a5cf741684306]::ty::consts::kind::UnevaluatedConst as rustc_errors[7a6b0cb348ec8a6d]::diagnostic::IntoDiagnosticArg>::into_diagnostic_arg
+  11:     0x7ffcff1bec3f - <rustc_middle[2a0a5cf741684306]::ty::consts::kind::UnevaluatedConst as rustc_errors[7a6b0cb348ec8a6d]::diagnostic::IntoDiagnosticArg>::into_diagnostic_arg
+  12:     0x7ffcff1bf632 - rustc_middle[2a0a5cf741684306]::util::bug::bug_fmt
+  13:     0x7ffcfda6505b - <rustc_metadata[60103ce1dbfa0992]::creader::CStore as rustc_session[9859ecff04834aee]::cstore::CrateStore>::stable_crate_id_to_crate_num
+  14:     0x7ffcfdd398f8 - <rustc_query_system[71305d975d7b23bc]::dep_graph::dep_node::DepNode as rustc_middle[2a0a5cf741684306]::dep_graph::dep_node::DepNodeExt>::extract_def_id
+  15:     0x7ffcfd6e79b1 - rustc_query_impl[b2ac1db4e5254f8c]::query_callbacks
+  16:     0x7ffcfdd15159 - <rustc_middle[2a0a5cf741684306]::ty::assoc::AssocItems>::find_by_name_and_namespace
+  17:     0x7ffcfccb87e2 - <rustc_middle[2a0a5cf741684306]::query::on_disk_cache::OnDiskCache>::drop_serialized_data
+  18:     0x7ffcfcb19eef - rustc_incremental[c997d0d32de0c65d]::persist::fs::finalize_session_directory
+  19:     0x7ffcfcb1243e - rustc_symbol_mangling[cd9c4a19c12070c6]::test::report_symbol_names
+  20:     0x7ffcfcb1a540 - rustc_incremental[c997d0d32de0c65d]::persist::fs::finalize_session_directory
+  21:     0x7ffcfcb20818 - rustc_incremental[c997d0d32de0c65d]::persist::save::save_work_product_index
+  22:     0x7ffcfcb1c4e1 - rustc_incremental[c997d0d32de0c65d]::persist::save::save_dep_graph
+  23:     0x7ffcf9e7068e - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  24:     0x7ffcf9e76009 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  25:     0x7ffcf9eaeec3 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  26:     0x7ffcf9e71e6a - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  27:     0x7ffcf9eaf9f1 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  28:     0x7ffcf9e7465f - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  29:     0x7ffcf9e74778 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  30:     0x7ffd246a8f4c - std::sys::windows::thread::Thread::new::hfbde1f52ebd2d066
+  31:     0x7ffe3f30257d - BaseThreadInitThunk
+  32:     0x7ffe3fd2aa58 - RtlUserThreadStart
+
+
+rustc version: 1.76.0-nightly (0e2dac837 2023-12-04)
+platform: x86_64-pc-windows-msvc
+
+query stack during panic:
+end of query stack
