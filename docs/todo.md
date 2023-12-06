@@ -1,0 +1,12 @@
+ - [x] level loader
+ - [ ] boid spawner
+ - [ ] boid despawner
+ - [ ] game over screen
+ - [ ] intro sreen
+ - [ ] GG screen
+ - [ ] sprites for boid and player
+ - [ ] particles
+ - [ ] level graphics
+ - [ ] player abilities
+ - [ ] music & sound effects
+ - [ ] final build & itch.io page

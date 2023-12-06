@@ -12,17 +12,20 @@ pub struct Moveable {
   pub velocity: Vec3,
 }
 
+#[derive(Clone)]
 pub struct SdfBounds {
   sdf: Arc<dyn SDF<f32, Vec2> + Send + Sync>,
-  normals: EstimateNormal<
-    f32,
-    Vec2,
-    Arc<(dyn SDF<f32, Vec2> + Send + Sync)>,
-    CentralDifferenceEstimator<f32, Vec2, Dim2D>,
+  normals: Arc<
+    EstimateNormal<
+      f32,
+      Vec2,
+      Arc<(dyn SDF<f32, Vec2> + Send + Sync)>,
+      CentralDifferenceEstimator<f32, Vec2, Dim2D>,
+    >,
   >,
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Clone)]
 pub enum MoveableBounds {
   #[default]
   None,
@@ -34,7 +37,7 @@ impl MoveableBounds {
     let a: Arc<(dyn SDF<f32, Vec2> + Send + Sync)> = Arc::new(sdf);
     Self::Sdf(SdfBounds {
       sdf: a.clone(),
-      normals: estimate_normals(a, 0.001f32),
+      normals: Arc::new(estimate_normals(a, 0.001f32)),
     })
   }
   pub fn distance_to_edge(&self, p: Vec2) -> f32 {

@@ -24,8 +24,14 @@ impl SplashExtensions for App {
       )
       .add_systems(OnExit(show_on_state), despawn_screen::<OnSplashScreen>)
       // skip menus, create a new game as soon as simulation is ready
-      .add_systems(OnEnter(SimulationState::Ready), on_game_init)
-      .add_systems(OnEnter(SimulationState::Loaded), on_game_loaded)
+      .add_systems(
+        OnEnter(SimulationState::Ready),
+        on_game_init.run_if(in_state(show_on_state)),
+      )
+      .add_systems(
+        OnEnter(SimulationState::Loaded),
+        on_game_loaded.run_if(in_state(show_on_state)),
+      )
   }
 }
 
@@ -72,7 +78,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(RAISIN),
+        background_color: BackgroundColor(RAISIN.with_a(0.8)),
         ..default()
       },
       OnSplashScreen,

@@ -5,7 +5,7 @@ use music::*;
 
 use jam4::{
   boid::{Boid, BoidConfig},
-  Player, SimulationState,
+  GameControlCommand, Player, SimulationState,
 };
 mod camera;
 mod music;
@@ -21,6 +21,22 @@ impl GameExtensions for App {
     self
       .add_systems(OnEnter(game_state), (setup_music, setup_camera))
       .add_systems(
+        OnEnter(SimulationState::Loaded),
+        on_loaded.run_if(in_state(game_state)),
+      )
+      .add_systems(
+        OnEnter(SimulationState::GameComplete),
+        on_game_complete.run_if(in_state(game_state)),
+      )
+      .add_systems(
+        OnEnter(SimulationState::GameOver),
+        on_game_over.run_if(in_state(game_state)),
+      )
+      .add_systems(
+        OnEnter(SimulationState::LevelComplete),
+        on_level_complete.run_if(in_state(game_state)),
+      )
+      .add_systems(
         Update,
         (calc_player_direction, follow_player, boid_config)
           .run_if(in_state(SimulationState::Simulating)),
@@ -29,6 +45,27 @@ impl GameExtensions for App {
     //     .add_music()
     //     .add_player_ui()
   }
+}
+
+pub fn on_loaded(mut cmds: EventWriter<GameControlCommand>) {
+  cmds.send(GameControlCommand::StartGame)
+}
+
+pub fn on_level_complete(mut cmds: EventWriter<GameControlCommand>) {
+  // TODO: show UI with level summary
+  // wait for input or time
+  // send NextLevel command
+  info!("TODO: level complete screen");
+  cmds.send(GameControlCommand::NextLevel)
+}
+
+pub fn on_game_complete() {
+  info!("TODO: GG");
+}
+
+pub fn on_game_over(mut cmds: EventWriter<GameControlCommand>) {
+  info!("TODO: Game Over screen");
+  cmds.send(GameControlCommand::Retry);
 }
 
 pub fn calc_player_direction(

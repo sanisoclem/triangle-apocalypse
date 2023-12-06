@@ -3,13 +3,15 @@ use bevy_smud::SmudPlugin;
 
 pub mod boid;
 mod components;
+pub mod level;
 mod mods;
 pub mod moveable;
 mod player;
 mod state;
 
-use boid::{calculate_boid_direction, update_boid_velocity, BoidConfig, draw_boid_gizmos};
+use boid::{calculate_boid_direction, draw_boid_gizmos, update_boid_velocity, BoidConfig};
 pub use components::*;
+use level::{on_loading, check_if_level_complete, check_if_game_over, LevelManager, LevelRegistry};
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
 pub use player::*;
@@ -26,11 +28,16 @@ impl Jam4Extensions for App {
       .init_resource::<ModManager>()
       .init_resource::<MoveableBounds>()
       .init_resource::<BoidConfig>()
+      .init_resource::<LevelRegistry>()
+      .init_resource::<LevelManager>()
       .add_state::<SimulationState>()
       .add_event::<GameControlCommand>()
       .add_systems(OnExit(SimulationState::Disabled), register_mods)
-      .add_systems(OnEnter(SimulationState::Loading), run_mod_init)
-      .add_systems(OnEnter(SimulationState::Simulating), run_mod_setup)
+      .add_systems(OnEnter(SimulationState::Ready), run_mod_init)
+      .add_systems(
+        OnEnter(SimulationState::Loading),
+        (on_loading, apply_deferred, run_mod_setup).chain(),
+      )
       .add_systems(
         Update,
         (
@@ -38,6 +45,8 @@ impl Jam4Extensions for App {
           (
             run_mod_update,
             draw_boid_gizmos,
+            check_if_level_complete,
+            check_if_game_over,
             (
               calculate_boid_direction,
               update_boid_velocity,
