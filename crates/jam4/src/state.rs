@@ -8,6 +8,7 @@ pub enum SimulationState {
   Disabled,
   Ready,
   Loading,
+  Loaded,
   Simulating,
   Unloading,
 }
@@ -16,6 +17,7 @@ pub enum SimulationState {
 pub enum GameControlCommand {
   Initialize,
   NewGame,
+  StartGame,
 }
 
 pub fn process_game_control_commands(
@@ -32,6 +34,10 @@ pub fn process_game_control_commands(
       (SimulationState::Ready, GameControlCommand::NewGame) => {
         // signal to all systems to start loading whatever is required for new game
         next_sim_state.set(SimulationState::Loading);
+      },
+      (SimulationState::Loaded, GameControlCommand::StartGame) => {
+        // game has been loaded, signal that we should start the simulation
+        next_sim_state.set(SimulationState::Simulating)
       }
       _ => {
         unimplemented!()
@@ -45,6 +51,6 @@ pub fn wait_until_loading_complete(
   mut next_state: ResMut<NextState<SimulationState>>,
 ) {
   if qry.is_empty() {
-    next_state.set(SimulationState::Simulating);
+    next_state.set(SimulationState::Loaded);
   }
 }

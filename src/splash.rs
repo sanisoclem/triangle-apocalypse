@@ -1,6 +1,8 @@
 use bevy::{asset::LoadedFolder, prelude::*};
-use jam4::{GameControlCommand, Loading, ModManager, SimulationState};
-use utils::despawn_screen;
+use jam4::{GameControlCommand, ModManager, SimulationState};
+use utils::{despawn_screen, text::TextAnimation};
+
+use crate::colors::{LILAC, MISTY, RAISIN};
 
 pub trait SplashExtensions {
   fn add_splash_screen<T: States + Copy>(&mut self, show_on_state: T, next_state: T) -> &mut Self;
@@ -11,26 +13,30 @@ impl SplashExtensions for App {
     self
       .init_resource::<SplashState>()
       .insert_resource(SplashNextState(next_state))
+      .add_event::<SplashLog>()
       .add_systems(
         OnEnter(show_on_state),
         (preload_assets, (splash_setup, init_game)).chain(),
       )
       .add_systems(
         Update,
-        (mark_loaded, countdown, go_to_next_state::<T>).run_if(in_state(show_on_state)),
+        (wait_for_preload_assets, show_logs, go_to_next_state::<T>).run_if(in_state(show_on_state)),
       )
       .add_systems(OnExit(show_on_state), despawn_screen::<OnSplashScreen>)
       // skip menus, create a new game as soon as simulation is ready
-      .add_systems(OnEnter(SimulationState::Ready), new_game)
-      .add_systems(OnEnter(SimulationState::Simulating), mark_started)
+      .add_systems(OnEnter(SimulationState::Ready), on_game_init)
+      .add_systems(OnEnter(SimulationState::Loaded), on_game_loaded)
   }
 }
 
 #[derive(Component)]
 struct OnSplashScreen;
 
-#[derive(Resource, Deref, DerefMut)]
-struct SplashTimer(Timer);
+#[derive(Component)]
+struct LogText;
+
+#[derive(Component)]
+struct PressSpace;
 
 #[derive(Resource)]
 struct SplashNextState<T>(T);
@@ -39,11 +45,16 @@ struct SplashNextState<T>(T);
 struct SplashState {
   pub loaded_handles: Option<Handle<LoadedFolder>>,
   pub preload_complete: bool,
-  pub game_started: bool,
+  pub game_initialized: bool,
+  pub game_loaded: bool,
 }
 
-fn preload_assets(mut state: ResMut<SplashState>, asset_server: Res<AssetServer>) {
-  state.loaded_handles = Some(asset_server.load_folder("preload"));
+#[derive(Event)]
+pub struct SplashLog(String);
+impl From<&str> for SplashLog {
+  fn from(value: &str) -> Self {
+    Self(value.to_owned())
+  }
 }
 
 fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -57,46 +68,139 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
           justify_content: JustifyContent::Center,
           width: Val::Percent(100.0),
           height: Val::Percent(100.0),
+          display: Display::Flex,
+          flex_direction: FlexDirection::Column,
           ..default()
         },
+        background_color: BackgroundColor(RAISIN),
         ..default()
       },
       OnSplashScreen,
     ))
     .with_children(|parent| {
-      parent.spawn(ImageBundle {
-        style: Style {
-          width: Val::Px(200.0),
-          ..default()
-        },
-        image: UiImage::new(icon),
-        ..default()
-      });
-      parent.spawn(
-        TextBundle::from_section(
-          "Loading...",
-          TextStyle {
-            font_size: 80.0,
-            color: Color::rgb(0.9, 0.9, 0.9),
+      parent
+        .spawn(NodeBundle {
+          style: Style {
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            width: Val::Percent(100.0),
             ..default()
           },
-        )
-        .with_style(Style {
-          margin: UiRect::all(Val::Px(50.0)),
           ..default()
-        }),
-      );
+        })
+        .with_children(|parent2| {
+          parent2.spawn(ImageBundle {
+            style: Style {
+              width: Val::Px(200.0),
+              ..default()
+            },
+            image: UiImage::new(icon),
+            ..default()
+          });
+          parent2
+            .spawn(
+              TextBundle::from_section(
+                "Unnamed Game",
+                TextStyle {
+                  font_size: 80.0,
+                  color: LILAC,
+                  ..default()
+                },
+              )
+              .with_style(Style {
+                margin: UiRect::all(Val::Px(50.0)),
+                ..default()
+              }),
+            )
+            .insert(LogText);
+        });
+      parent
+        .spawn(
+          TextBundle::from_section(
+            "",
+            TextStyle {
+              font_size: 30.0,
+              color: MISTY,
+              ..default()
+            },
+          )
+          .with_style(Style {
+            margin: UiRect::all(Val::Px(20.0)),
+            ..default()
+          }),
+        )
+        .insert(PressSpace);
     });
-
-  // spawn an entity that indicate it is still loading
-  // we can signal the game the the splash screen is done
-  // so simulation starts at the same time as the splash screen decides to disappear
-  commands.spawn(OnSplashScreen).insert(Loading);
-
-  commands.insert_resource(SplashTimer(Timer::from_seconds(1.0, TimerMode::Once)));
 }
 
-fn mark_loaded(
+fn preload_assets(
+  mut log: EventWriter<SplashLog>,
+  mut state: ResMut<SplashState>,
+  asset_server: Res<AssetServer>,
+) {
+  state.loaded_handles = Some(asset_server.load_folder("preload"));
+  log.send("Preloading assets...".into());
+}
+
+fn init_game(
+  mut log: EventWriter<SplashLog>,
+  mut mod_mgr: ResMut<ModManager>,
+  mut cmds: EventWriter<GameControlCommand>,
+) {
+  // hard code the base game
+  mod_mgr.clear().register(base_game::get_module());
+  // initialize modules
+  cmds.send(GameControlCommand::Initialize);
+  log.send("Initializing game modules...".into());
+}
+
+fn on_game_init(
+  mut log: EventWriter<SplashLog>,
+  mut cmds: EventWriter<GameControlCommand>,
+  mut splash_state: ResMut<SplashState>,
+) {
+  splash_state.game_initialized = true;
+  cmds.send(GameControlCommand::NewGame);
+  log.send("Initializing game modules...ok".into());
+  log.send("Loading new game...".into());
+}
+
+fn on_game_loaded(
+  mut log: EventWriter<SplashLog>,
+  mut splash_state: ResMut<SplashState>,
+  qry: Query<Entity, With<PressSpace>>,
+  mut cmd: Commands,
+) {
+  splash_state.game_loaded = true;
+  log.send("Loading new game...ok".into());
+
+  cmd.entity(qry.single()).insert(TextAnimation {
+    text: "Press space to continue".to_owned(),
+    animation_speed: 1.0,
+  });
+}
+
+fn show_logs(mut log: EventReader<SplashLog>, mut qry: Query<&mut Text, With<LogText>>) {
+  if let Ok(mut target) = qry.get_single_mut() {
+    for l in log.read() {
+      if let Some(m) = target
+        .sections
+        .iter_mut()
+        .find(|t| l.0.starts_with(&t.value[1..]))
+      {
+        m.value = format!("\n{}", l.0);
+      } else {
+        target.sections.push(TextSection {
+          value: format!("\n{}", l.0),
+          ..default()
+        })
+      }
+    }
+  }
+}
+
+fn wait_for_preload_assets(
+  mut log: EventWriter<SplashLog>,
   mut splash_state: ResMut<SplashState>,
   mut events: EventReader<AssetEvent<LoadedFolder>>,
 ) {
@@ -109,6 +213,7 @@ fn mark_loaded(
         if let Some(handle) = &splash_state.loaded_handles {
           if id == &Into::<AssetId<LoadedFolder>>::into(handle) {
             splash_state.preload_complete = true;
+            log.send("Preloading assets...ok".into());
           }
         }
       }
@@ -117,40 +222,19 @@ fn mark_loaded(
   }
 }
 
-fn init_game(mut mod_mgr: ResMut<ModManager>, mut cmds: EventWriter<GameControlCommand>) {
-  // hard code the base game
-  mod_mgr.clear().register(base_game::get_module());
-  // initialize modules
-  cmds.send(GameControlCommand::Initialize);
-}
-
-fn new_game(mut cmds: EventWriter<GameControlCommand>) {
-  cmds.send(GameControlCommand::NewGame);
-}
-
-fn mark_started(mut splash_state: ResMut<SplashState>) {
-  splash_state.game_started = true;
-}
-
-fn countdown(
-  mut cmd: Commands,
-  qry: Query<Entity, (With<Loading>, With<OnSplashScreen>)>,
-  mut timer: ResMut<SplashTimer>,
-  time: Res<Time>,
-) {
-  if timer.tick(time.delta()).finished() {
-    if let Ok(e) = qry.get_single() {
-      cmd.entity(e).despawn();
-    }
-  }
-}
-
 fn go_to_next_state<T: States>(
   mut app_state: ResMut<NextState<T>>,
   splash_state: Res<SplashState>,
   next_state: Res<SplashNextState<T>>,
+  keyboard_input: Res<Input<KeyCode>>,
+  mut cmds: EventWriter<GameControlCommand>,
 ) {
-  if splash_state.preload_complete && splash_state.game_started {
+  if keyboard_input.just_pressed(KeyCode::Space)
+    && splash_state.preload_complete
+    && splash_state.game_initialized
+    && splash_state.game_loaded
+  {
+    cmds.send(GameControlCommand::StartGame);
     app_state.set(next_state.0.clone());
   }
 }

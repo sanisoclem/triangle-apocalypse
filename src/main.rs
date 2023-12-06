@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_egui::EguiPlugin;
 use game::GameExtensions;
 use jam4::Jam4Extensions;
 use splash::SplashExtensions;
@@ -12,6 +12,7 @@ enum AppState {
 }
 
 mod game;
+mod colors;
 mod splash;
 
 #[cfg(target_arch = "wasm32")]
@@ -22,16 +23,20 @@ use wasm_bindgen::prelude::*;
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn main_wasm() {
-    main();
+  main();
 }
 
 fn main() {
   App::new()
     .add_plugins(DefaultPlugins)
-    .add_plugins(utils::fps::ScreenDiagsTextPlugin)
+    .add_plugins((
+      utils::fps::ScreenDiagsTextPlugin,
+      utils::text::TextAnimationPlugin,
+    ))
     .add_state::<AppState>()
     .add_splash_screen(AppState::Splash, AppState::Game)
-    .add_plugins(WorldInspectorPlugin::default())
+    //.add_plugins(WorldInspectorPlugin::default())
+    .add_plugins(EguiPlugin)
     .add_jam_game()
     .add_game(AppState::Game)
     .run();
