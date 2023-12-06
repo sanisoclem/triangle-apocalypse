@@ -1,16 +1,5 @@
-Save the Queen:
-  - day & night cycle
-  - command colony
-  - colony:
-    - autonomous
-    - reproduction
-    - hunger
-    - hp == stamina
-    - new abilities unlocked via defeating other colonies
-
-
-Boid Commander:
-  - boid squad
-    - autonomous
-    - new abilities unlocked from boss
-    - reproduction
+ - lead flock of boids
+ - gets as many boids to the end of the level
+ - change flocking behavior to adapt to level
+ - collision with level = death
+ - grab boids from "local flocks"

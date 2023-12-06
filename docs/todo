@@ -1,35 +1,12 @@
-Save the Queen
-- scaffold
-- camera
-- static terrain
-- player movement
-- minimap
-- swarming system
-- battle system
-- reproduction system
-- colony spawning system
-- music
-- day & night cycle
-- creature design
-- ability design
-- particles
-- ui
-- intro text
-
-
-Boid Commander
-- scaffold
-- camera
-- static terrain
-- player movement
-- boid system
-- battle system
-- reproduction system
-- enemy spawning system
-- music
-- audio effects
-- creature design
-- ability design
-- ui
-- particles
-- intro text
+ - level loader
+ - boid spawner
+ - boid despawner
+ - game over screen
+ - intro sreen
+ - GG screen
+ - sprites for boid and player
+ - particles
+ - level graphics
+ - player abilities
+ - music & sound effects
+ - final build & itch.io page
