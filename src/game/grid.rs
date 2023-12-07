@@ -51,7 +51,7 @@ pub fn build_grid(
   commands.spawn(MaterialMesh2dBundle {
     mesh: Mesh2dHandle(meshes.add(grid)),
     material: materials.add(GridMaterial {}),
-    transform: Transform::from_translation(Vec3::new(0.0,0.0,-100.)),
+    transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
     ..default()
   });
 }

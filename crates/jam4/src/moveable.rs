@@ -12,6 +12,9 @@ pub struct Moveable {
   pub velocity: Vec3,
 }
 
+#[derive(Component, Default)]
+pub struct CollidedWithBounds;
+
 #[derive(Clone)]
 pub struct SdfBounds {
   sdf: Arc<dyn SDF<f32, Vec2> + Send + Sync>,
@@ -79,14 +82,20 @@ impl MoveableBounds {
 }
 
 pub fn move_moveables(
+  mut cmd: Commands,
   bounds: Res<MoveableBounds>,
-  mut qry: Query<(&mut Transform, &mut Moveable)>,
+  mut qry: Query<(Entity, &mut Transform, &mut Moveable)>,
   time: Res<Time>,
 ) {
-  for (mut trn, mut mov) in qry.iter_mut() {
+  for (e, mut trn, mut mov) in qry.iter_mut() {
     // calculate next position
     let travel = mov.velocity * time.delta_seconds();
     let (new_translation, new_v) = bounds.bounce(trn.translation.xy(), travel.xy());
+
+    if new_translation == trn.translation.xy() && travel.length_squared() > 0.0 {
+      // collided
+      cmd.entity(e).insert(CollidedWithBounds);
+    }
 
     // update position
     *trn = trn.with_translation(new_translation.extend(0.0));

@@ -1,9 +1,9 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 use bevy_smud::prelude::*;
 use jam4::{
   level::{LevelInfo, LevelRegistry},
-  moveable::{MoveableBounds, Moveable},
-  GameModuleDescriptor, NativeGameModule, boid::Boid,
+  moveable::MoveableBounds,
+  GameModuleDescriptor, NativeGameModule,
 };
 use sdfu::SDF;
 
@@ -58,23 +58,22 @@ pub fn on_init(mut lvl_registry: ResMut<LevelRegistry>, asset_server: Res<AssetS
   lvl_registry.start_level = Some(id);
 }
 
-pub fn on_setup(
-  mut cmd: Commands,
-  mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<ColorMaterial>>,
+pub fn on_setup(// mut cmd: Commands,
+  // mut meshes: ResMut<Assets<Mesh>>,
+  // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-  for x in -515..515 {
-    cmd
-      .spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
-        transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.))
-          .with_scale(Vec3::new(1.0, 2.0, 1.0)),
-        ..default()
-      })
-      .insert(Moveable::default())
-      .insert(Boid::default());
-  }
+  // for x in -515..515 {
+  //   cmd
+  //     .spawn(MaterialMesh2dBundle {
+  //       mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
+  //       material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
+  //       transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.))
+  //         .with_scale(Vec3::new(1.0, 2.0, 1.0)),
+  //       ..default()
+  //     })
+  //     .insert(Moveable::default())
+  //     .insert(Boid::default());
+  // }
 }
 
 pub fn some_system(_qry: Query<Entity>) {}

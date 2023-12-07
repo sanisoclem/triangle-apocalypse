@@ -11,7 +11,7 @@ mod state;
 
 use boid::{calculate_boid_direction, draw_boid_gizmos, update_boid_velocity, BoidConfig};
 pub use components::*;
-use level::{on_loading, check_if_level_complete, check_if_game_over, LevelManager, LevelRegistry};
+use level::{on_loading, check_if_level_complete, check_if_game_over, LevelManager, LevelRegistry, on_load_level_requested};
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
 pub use player::*;
@@ -36,7 +36,7 @@ impl Jam4Extensions for App {
       .add_systems(OnEnter(SimulationState::Ready), run_mod_init)
       .add_systems(
         OnEnter(SimulationState::Loading),
-        (on_loading, apply_deferred, run_mod_setup).chain(),
+        (on_loading, on_load_level_requested, apply_deferred, run_mod_setup).chain(),
       )
       .add_systems(
         Update,
