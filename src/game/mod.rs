@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Material2dPlugin};
 use bevy_egui::{egui, EguiContexts};
 use camera::*;
 use music::*;
@@ -7,7 +7,10 @@ use jam4::{
   boid::{Boid, BoidConfig},
   GameControlCommand, Player, SimulationState,
 };
+
+use self::grid::{build_grid, GridMaterial};
 mod camera;
+mod grid;
 mod music;
 
 #[derive(Resource)]
@@ -19,6 +22,7 @@ pub trait GameExtensions {
 impl GameExtensions for App {
   fn add_game<T: States + Copy>(&mut self, game_state: T) -> &mut Self {
     self
+      .add_plugins(Material2dPlugin::<GridMaterial>::default())
       .add_systems(OnEnter(game_state), (setup_music, setup_camera))
       .add_systems(
         OnEnter(SimulationState::Loaded),
@@ -36,6 +40,7 @@ impl GameExtensions for App {
         OnEnter(SimulationState::LevelComplete),
         on_level_complete.run_if(in_state(game_state)),
       )
+      .add_systems(OnEnter(SimulationState::Simulating), build_grid)
       .add_systems(
         Update,
         (calc_player_direction, follow_player, boid_config)

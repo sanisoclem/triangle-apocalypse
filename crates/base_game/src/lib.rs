@@ -1,10 +1,9 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_smud::prelude::*;
 use jam4::{
-  boid::Boid,
   level::{LevelInfo, LevelRegistry},
-  moveable::{Moveable, MoveableBounds},
-  GameModuleDescriptor, NativeGameModule, Player,
+  moveable::{MoveableBounds, Moveable},
+  GameModuleDescriptor, NativeGameModule, boid::Boid,
 };
 use sdfu::SDF;
 
@@ -28,10 +27,7 @@ fn register_update(sched: &mut Schedule) {
   sched.add_systems(some_system);
 }
 
-pub fn on_init(
-  mut lvl_registry: ResMut<LevelRegistry>,
-  asset_server: Res<AssetServer>,
-) {
+pub fn on_init(mut lvl_registry: ResMut<LevelRegistry>, asset_server: Res<AssetServer>) {
   let outer = sdfu::Box::new(Vec2::new(3000., 10000.));
   let inner = sdfu::Box::new(Vec2::new(2000., 9000.));
   let m1 = sdfu::Circle::new(200.0).translate(Vec2::new(300., 200.));
@@ -63,54 +59,22 @@ pub fn on_init(
 }
 
 pub fn on_setup(
-  // mut cmd: Commands,
-  // mut meshes: ResMut<Assets<Mesh>>,
-  // mut materials: ResMut<Assets<ColorMaterial>>,
-  // asset_server: Res<AssetServer>,
+  mut cmd: Commands,
+  mut meshes: ResMut<Assets<Mesh>>,
+  mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-  // let terrain_shader = asset_server.load("preload/terrain.wgsl");
-
-  // cmd.spawn(ShapeBundle {
-  //   shape: SmudShape {
-  //     color: Color::TOMATO,
-  //     sdf: terrain_shader,
-  //     frame: Frame::Quad(30000.),
-  //     ..default()
-  //   },
-  //   ..default()
-  // });
-
-  // cmd
-  //   .spawn(MaterialMesh2dBundle {
-  //     mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
-  //     material: materials.add(ColorMaterial::from(Color::rgb(17.5, 0.0, 7.5))),
-  //     transform: Transform::from_translation(Vec3::new(0., 0., -100.0))
-  //       .with_scale(Vec3::new(1.0, 2.0, 1.0)),
-  //     ..default()
-  //   })
-  //   .insert(Player::default())
-  //   .insert(Moveable {
-  //     // velocity: Vec3::Y * 300.,
-  //     ..default()
-  //   })
-  //   .insert(Boid {
-  //     is_player: true,
-  //     personal_space: 100.,
-  //     ..default()
-  //   });
-
-  // for x in -15..15 {
-  //   cmd
-  //     .spawn(MaterialMesh2dBundle {
-  //       mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
-  //       material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
-  //       transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.))
-  //         .with_scale(Vec3::new(1.0, 2.0, 1.0)),
-  //       ..default()
-  //     })
-  //     .insert(Moveable::default())
-  //     .insert(Boid::default());
-  // }
+  for x in -515..515 {
+    cmd
+      .spawn(MaterialMesh2dBundle {
+        mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
+        material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
+        transform: Transform::from_translation(Vec3::new(0.0 + (x as f32) * 0.001, 0., 0.))
+          .with_scale(Vec3::new(1.0, 2.0, 1.0)),
+        ..default()
+      })
+      .insert(Moveable::default())
+      .insert(Boid::default());
+  }
 }
 
 pub fn some_system(_qry: Query<Entity>) {}

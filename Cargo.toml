@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
+bevy_smud = { workspace = true }
 jam4 = { path = "crates/jam4", version = "0.1.0" }
 base_game = { path = "crates/base_game", version = "0.1.0" }
 utils = { path = "crates/utils", version = "0.1.0" }
@@ -18,7 +19,7 @@ members = ["crates/*"]
 sdfu = { git = "https://github.com/sanisoclem/sdfu.git", branch = "master", version = "0.3.1-alpha.1", features = [
   "glam",
 ] }
-bevy = "0.12"
+bevy = { version = "0.12", features = ["file_watcher"] }
 bevy_smud = "0.7"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

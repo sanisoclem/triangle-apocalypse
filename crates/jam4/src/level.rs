@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_smud::{ShapeBundle, SmudShape};
+use bevy_smud::{Frame, ShapeBundle, SmudShape};
+use utils::tex_settings_tiled;
 
 use crate::{
   boid::Boid,
@@ -59,6 +60,7 @@ fn load_level(
   lvl_id: &LevelId,
   lvl: &LevelInfo,
   mut lvl_mgr: ResMut<LevelManager>,
+  asset_server: Res<AssetServer>,
 ) {
   // despawn all prev level entities
   for entity in &to_despawn {
@@ -81,7 +83,7 @@ fn load_level(
   cmd
     .spawn(MaterialMesh2dBundle {
       mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
-      material: materials.add(ColorMaterial::from(Color::rgb(17.5, 0.0, 7.5))),
+      material: materials.add(ColorMaterial::from(Color::rgb(7.5, 0.0, 7.5))),
       transform: Transform::from_translation(Vec3::new(0., 0., -100.0))
         .with_scale(Vec3::new(1.0, 2.0, 1.0)),
       ..default()
@@ -99,7 +101,7 @@ fn load_level(
   cmd
     .spawn(AudioBundle {
       source: lvl.music.clone(),
-      settings: PlaybackSettings::LOOP.paused(),
+      settings: PlaybackSettings::LOOP,
       ..default()
     })
     .insert(Simulation);
@@ -118,6 +120,7 @@ pub fn on_loading(
   materials: ResMut<Assets<ColorMaterial>>,
   cmd: Commands,
   to_despawn: Query<Entity, With<Simulation>>,
+  asset_server: Res<AssetServer>,
 ) {
   if let Some(cur_lvl) = lvl_mgr.current_level {
     if !lvl_mgr.level_complete {
@@ -135,6 +138,7 @@ pub fn on_loading(
         &cur_lvl,
         current_lvl,
         lvl_mgr,
+        asset_server,
       )
     } else {
       // level complete, load next level
@@ -148,7 +152,15 @@ pub fn on_loading(
           .get(&next)
           .expect("Next level should be in registry");
         load_level(
-          bounds, meshes, materials, cmd, to_despawn, &next, next_lvl, lvl_mgr,
+          bounds,
+          meshes,
+          materials,
+          cmd,
+          to_despawn,
+          &next,
+          next_lvl,
+          lvl_mgr,
+          asset_server,
         )
       } else {
         next_sim_state.set(SimulationState::GameComplete)
@@ -164,7 +176,15 @@ pub fn on_loading(
       .get(&start)
       .expect("Start level should be in registry");
     load_level(
-      bounds, meshes, materials, cmd, to_despawn, &start, start_lvl, lvl_mgr,
+      bounds,
+      meshes,
+      materials,
+      cmd,
+      to_despawn,
+      &start,
+      start_lvl,
+      lvl_mgr,
+      asset_server,
     )
   }
 }
