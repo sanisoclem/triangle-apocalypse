@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 
 #[derive(Component)]
-pub struct Loading;
+pub struct Initializing;
 
 #[derive(Component)]
 pub struct Simulation;

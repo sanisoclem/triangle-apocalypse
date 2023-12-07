@@ -5,7 +5,7 @@ use jam4::{
   Player,
 };
 
-use crate::colors::*;
+use utils::colors::*;
 
 #[derive(Component)]
 pub struct InPlayingScreen;

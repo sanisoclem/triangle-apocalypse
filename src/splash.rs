@@ -2,7 +2,7 @@ use bevy::{asset::LoadedFolder, prelude::*};
 use jam4::{GameControlCommand, ModManager, SimulationState};
 use utils::{despawn_screen, text::TextAnimation};
 
-use crate::colors::{LILAC, MISTY, RAISIN};
+use utils::colors::*;
 
 pub trait SplashExtensions {
   fn add_splash_screen<T: States + Copy>(&mut self, show_on_state: T, next_state: T) -> &mut Self;
@@ -28,10 +28,6 @@ impl SplashExtensions for App {
         OnEnter(SimulationState::Ready),
         on_game_init.run_if(in_state(show_on_state)),
       )
-      .add_systems(
-        OnEnter(SimulationState::Loaded),
-        on_game_loaded.run_if(in_state(show_on_state)),
-      )
   }
 }
 
@@ -52,7 +48,6 @@ struct SplashState {
   pub loaded_handles: Option<Handle<LoadedFolder>>,
   pub preload_complete: bool,
   pub game_initialized: bool,
-  pub game_loaded: bool,
 }
 
 #[derive(Event)]
@@ -162,23 +157,12 @@ fn init_game(
 
 fn on_game_init(
   mut log: EventWriter<SplashLog>,
-  mut cmds: EventWriter<GameControlCommand>,
-  mut splash_state: ResMut<SplashState>,
-) {
-  splash_state.game_initialized = true;
-  cmds.send(GameControlCommand::NewGame);
-  log.send("Initializing game modules...ok".into());
-  log.send("Loading new game...".into());
-}
-
-fn on_game_loaded(
-  mut log: EventWriter<SplashLog>,
   mut splash_state: ResMut<SplashState>,
   qry: Query<Entity, With<PressSpace>>,
   mut cmd: Commands,
 ) {
-  splash_state.game_loaded = true;
-  log.send("Loading new game...ok".into());
+  splash_state.game_initialized = true;
+  log.send("Initializing game modules...ok".into());
 
   cmd.entity(qry.single()).insert(TextAnimation {
     text: "Press space to continue".to_owned(),
@@ -238,7 +222,6 @@ fn go_to_next_state<T: States>(
   if keyboard_input.just_pressed(KeyCode::Space)
     && splash_state.preload_complete
     && splash_state.game_initialized
-    && splash_state.game_loaded
   {
     cmds.send(GameControlCommand::StartGame);
     app_state.set(next_state.0.clone());

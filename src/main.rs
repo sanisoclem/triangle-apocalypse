@@ -12,7 +12,6 @@ enum AppState {
 }
 
 mod game;
-mod colors;
 mod splash;
 
 #[cfg(target_arch = "wasm32")]

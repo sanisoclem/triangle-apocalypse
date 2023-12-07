@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use jam4::GameControlCommand;
 use utils::text::TextAnimation;
 
-use crate::colors::{MISTY, RAISIN};
+use utils::colors::*;
 
 #[derive(Component)]
 pub struct InGameOverScreen;

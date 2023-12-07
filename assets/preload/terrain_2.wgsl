@@ -1,10 +1,10 @@
-#define_import_path smud::terrain
+#define_import_path smud::terrain_2
 
 #import smud
 
 fn sdf(p_in: vec2<f32>) -> f32 {
-  let outer = smud::sd_box(p_in, vec2<f32>(3000., 10000.));
-  let inner = smud::sd_box(p_in, vec2<f32>(2000., 9000.));
+  let outer = smud::sd_box(p_in, vec2<f32>(2000., 10000.));
+  let inner = smud::sd_box(p_in, vec2<f32>(1000., 9000.));
   let m1 = smud::sd_circle(p_in - vec2<f32>(300.,200.), 200.);
   let m2 = smud::sd_circle(p_in - vec2<f32>(-200.,300.), 150.);
   let m3 = smud::sd_circle(p_in - vec2<f32>(300.,-300.), 125.);

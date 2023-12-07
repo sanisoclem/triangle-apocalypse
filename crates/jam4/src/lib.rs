@@ -11,7 +11,10 @@ mod state;
 
 use boid::{calculate_boid_direction, draw_boid_gizmos, update_boid_velocity, BoidConfig};
 pub use components::*;
-use level::{on_loading, check_if_level_complete, check_if_game_over, LevelManager, LevelRegistry, on_load_level_requested};
+use level::{
+  check_if_game_over, check_if_level_complete, find_level_to_load, on_load_level_requested,
+  LevelManager, LevelRegistry,
+};
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
 pub use player::*;
@@ -33,10 +36,16 @@ impl Jam4Extensions for App {
       .add_state::<SimulationState>()
       .add_event::<GameControlCommand>()
       .add_systems(OnExit(SimulationState::Disabled), register_mods)
-      .add_systems(OnEnter(SimulationState::Ready), run_mod_init)
+      .add_systems(OnEnter(SimulationState::Initializing), run_mod_init)
       .add_systems(
-        OnEnter(SimulationState::Loading),
-        (on_loading, on_load_level_requested, apply_deferred, run_mod_setup).chain(),
+        OnEnter(SimulationState::ChoosingLevel),
+        (
+          find_level_to_load,
+          on_load_level_requested,
+          apply_deferred,
+          run_mod_setup,
+        )
+          .chain(),
       )
       .add_systems(
         Update,
@@ -55,7 +64,7 @@ impl Jam4Extensions for App {
               .chain(),
           )
             .run_if(in_state(SimulationState::Simulating)),
-          wait_until_loading_complete.run_if(in_state(SimulationState::Loading)),
+          wait_until_initialization_complete.run_if(in_state(SimulationState::Initializing)),
         ),
       )
   }

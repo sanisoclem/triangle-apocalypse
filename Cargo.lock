@@ -357,6 +357,7 @@ dependencies = [
  "bevy_smud",
  "jam4",
  "sdfu",
+ "utils",
 ]
 
 [[package]]

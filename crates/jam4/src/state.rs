@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
-use crate::Loading;
+use crate::Initializing;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum SimulationState {
   #[default]
   Disabled, // initial state
-  /// All modules have been initialized
+  /// All modules start initialization
   /// this is only done once
+  Initializing,
+  // all modules initialized
   Ready,
-  /// Loading a level
-  Loading,
-  /// Level has been loaded, waiting for start signal
-  Loaded,
+  /// Phase to determine which level to start
+  ChoosingLevel,
   /// Simulation is running
   /// this can only transition to LevelComplete or GameOver
   Simulating, // main phase, create UI here
@@ -30,10 +30,9 @@ pub enum SimulationState {
 #[derive(Event, Debug)]
 pub enum GameControlCommand {
   Initialize,
-  NewGame,
   StartGame,
   NextLevel,
-  Retry
+  Retry,
 }
 
 pub fn process_game_control_commands(
@@ -42,25 +41,22 @@ pub fn process_game_control_commands(
   current_state: Res<State<SimulationState>>,
 ) {
   for cmd in cmds.read() {
+    info!("{current_state:?} {cmd:?}");
     match ((*current_state).get(), cmd) {
       (SimulationState::Disabled, GameControlCommand::Initialize) => {
         // set state so exclusive system to register module runs
-        next_sim_state.set(SimulationState::Ready);
+        next_sim_state.set(SimulationState::Initializing);
       }
-      (SimulationState::Ready, GameControlCommand::NewGame) => {
-        // signal to all systems to start loading whatever is required for new game
-        next_sim_state.set(SimulationState::Loading);
+      (SimulationState::Ready, GameControlCommand::StartGame) => {
+        // signal that we want to load a level and play
+        next_sim_state.set(SimulationState::ChoosingLevel)
       }
-      (SimulationState::Loaded, GameControlCommand::StartGame) => {
-        // game has been loaded, signal that we should start the simulation
-        next_sim_state.set(SimulationState::Simulating)
-      },
       (SimulationState::LevelComplete, GameControlCommand::NextLevel) => {
         // level has been completed, signal that we want to unload current level and load next level
-        next_sim_state.set(SimulationState::Loading)
-      },
+        next_sim_state.set(SimulationState::ChoosingLevel)
+      }
       (SimulationState::GameOver, GameControlCommand::Retry) => {
-        next_sim_state.set(SimulationState::Loading)
+        next_sim_state.set(SimulationState::ChoosingLevel)
       }
       _ => {
         unimplemented!()
@@ -69,11 +65,11 @@ pub fn process_game_control_commands(
   }
 }
 
-pub fn wait_until_loading_complete(
-  qry: Query<Entity, With<Loading>>,
+pub fn wait_until_initialization_complete(
+  qry: Query<Entity, With<Initializing>>,
   mut next_state: ResMut<NextState<SimulationState>>,
 ) {
   if qry.is_empty() {
-    next_state.set(SimulationState::Loaded);
+    next_state.set(SimulationState::Ready);
   }
 }

@@ -2,16 +2,16 @@ use bevy::{prelude::*, sprite::Material2dPlugin};
 
 use camera::*;
 
-use jam4::{GameControlCommand, SimulationState};
+use jam4::SimulationState;
 use utils::despawn_screen;
 
 use self::{
-  controls::{calc_player_direction, setup_player_ui, InPlayingScreen, update_player_ui},
+  controls::{calc_player_direction, setup_player_ui, update_player_ui, InPlayingScreen},
   debug::boid_config_debug,
   game_over::{on_game_over, wait_to_retry, InGameOverScreen},
   gg::on_game_complete,
   grid::{build_grid, GridMaterial},
-  level_complete::{on_level_complete, InLevelCompleteScreen},
+  level_complete::{wait_to_next_level, InLevelCompleteScreen, setup_level_complete},
 };
 mod controls;
 mod game_over;
@@ -33,13 +33,9 @@ impl GameExtensions for App {
     self
       .add_plugins(Material2dPlugin::<GridMaterial>::default())
       .add_systems(OnEnter(game_state), setup_camera)
-      .add_systems(
-        OnEnter(SimulationState::Loaded),
-        on_loaded.run_if(in_state(game_state)),
-      )
       .add_systems(OnEnter(SimulationState::GameComplete), on_game_complete)
       .add_systems(
-        OnExit(SimulationState::LevelComplete),
+        OnExit(SimulationState::GameComplete),
         despawn_screen::<InLevelCompleteScreen>,
       )
       .add_systems(OnEnter(SimulationState::GameOver), on_game_over)
@@ -47,7 +43,10 @@ impl GameExtensions for App {
         OnExit(SimulationState::GameOver),
         despawn_screen::<InGameOverScreen>,
       )
-      .add_systems(OnEnter(SimulationState::LevelComplete), on_level_complete)
+      .add_systems(
+        OnEnter(SimulationState::LevelComplete),
+        setup_level_complete,
+      )
       .add_systems(
         OnExit(SimulationState::LevelComplete),
         despawn_screen::<InLevelCompleteScreen>,
@@ -71,11 +70,8 @@ impl GameExtensions for App {
           )
             .run_if(in_state(SimulationState::Simulating)),
           wait_to_retry.run_if(in_state(SimulationState::GameOver)),
+          wait_to_next_level.run_if(in_state(SimulationState::LevelComplete)),
         ),
       )
   }
-}
-
-pub fn on_loaded(mut cmds: EventWriter<GameControlCommand>) {
-  cmds.send(GameControlCommand::StartGame)
 }
