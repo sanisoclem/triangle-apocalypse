@@ -105,7 +105,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // blending is done in a perceptual color space: https://bottosson.github.io/posts/oklab/
     let red = vec3<f32>(10.0, 0.0, 0.0);
     let green = vec3<f32>(0.0, 10.0, 0.0);
-    let orange = vec3<f32>(20.0, 1.0, 0.0);
+    let orange = vec3<f32>(20.0, 0.0, 20.0);
     let blue = vec3<f32>(0.0, 0.0, 10.0);
     let white = vec3<f32>(1.0, 1.0, 1.0);
     // let mixed = mix(mix(mix(red, blue, t_1), mix(green, white, t_2), t_3), green, distance_to_center);
@@ -120,11 +120,15 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 
 
     var x1 = (cos(in.world_position.x / 1200.) *sin(in.world_position.x / 1500.)); //sin(floor((in.world_position.x) /100.));
-    var y1 = pow(fract((in.world_position.y + (x1 * 10000.) - (globals.time * 1000.)) /10000.), 10.);
+    var y1 = pow(fract((in.world_position.y + (x1 * 10000.) - (globals.time * 1000.)) /10000.), 20.);
     var y2 = pow( fract((in.world_position.y - (globals.time * 1000.)) /10000.),20.);
 
+    var f = 0.0;
+    if y2 >= 0.995 {
+        f = 1.0;
+    }
 
-    let color = max(max(faint_grid, vertical_lines * orange * y1), max(small_grid, big_grid) * y2 * blue* 0.5);
+    let color = max(max(faint_grid, vertical_lines * orange * y1), max(f, max(small_grid, big_grid)) * y2 * blue* 0.5);
     // let color = vec3<f32>(y1);
 
     //return vec4<f32>(mix(g1,g2,1.0), 1.0);
