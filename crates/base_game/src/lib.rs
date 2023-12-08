@@ -96,14 +96,13 @@ fn build_level1(asset_server: &AssetServer) -> LevelInfo {
     music: asset_server.load("preload/battle_1.ogg"),
     name: "Level 1".to_owned(),
     next_level: None,
-    starting_point: Vec2::new(0.0, - 9000.),
+    starting_point: Vec2::new(0.0, -9000.),
     // starting_point: Vec2::ZERO,
-    boids_per_spawn_point: 10,
-    spawn_points: vec![
-      Vec2::new(0., 600.),
-      Vec2::new(0., -8800.),
-      Vec2::new(0., 1200.),
-    ],
+    boids_per_spawn_point: 20,
+    spawn_points: (-9..9)
+      .into_iter()
+      .map(|x| Vec2::new(0., 1000. * x as f32))
+      .collect(),
   };
   lvl
 }

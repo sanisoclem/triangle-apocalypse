@@ -5,8 +5,6 @@ use jam4::{
   Player, PlayerInfo,
 };
 
-use utils::colors::*;
-
 #[derive(Component)]
 pub struct InPlayingScreen;
 
@@ -19,12 +17,12 @@ pub fn setup_player_ui(mut cmd: Commands) {
       NodeBundle {
         style: Style {
           width: Val::Percent(100.0),
-          height: Val::Px(100.0),
+          height: Val::Px(60.0),
           bottom: Val::Px(0.0),
           position_type: PositionType::Absolute,
+          padding: UiRect::all(Val::Px(10.0)),
           ..default()
         },
-        background_color: BackgroundColor(RAISIN.with_a(0.8)),
         ..default()
       },
       InPlayingScreen,
@@ -32,11 +30,15 @@ pub fn setup_player_ui(mut cmd: Commands) {
     .with_children(|parent| {
       parent
         .spawn(TextBundle {
+          style: Style {
+            width: Val::Percent(100.0),
+            ..default()
+          },
           text: Text {
             sections: vec![TextSection {
               value: "".to_owned(),
               style: TextStyle {
-                font_size: 80.,
+                font_size: 40.,
                 color: utils::colors::FAIRY,
                 ..default()
               },
@@ -52,14 +54,17 @@ pub fn setup_player_ui(mut cmd: Commands) {
 
 pub fn update_player_ui(
   qry_boid: Query<Entity, (With<Boid>, With<TamedBoid>, Without<Player>)>,
+  qry_boid2: Query<Entity, (With<Boid>, Without<TamedBoid>, Without<Player>)>,
   mut qry_ui: Query<&mut Text, With<ScoreBoard>>,
   player: Res<PlayerInfo>,
 ) {
   let Ok(mut txt) = qry_ui.get_single_mut() else {
     return;
   };
+  let tamed = qry_boid.iter().count();
+  let wild = qry_boid2.iter().count();
   txt.sections.first_mut().unwrap().value =
-    format!("{} + {}", player.score, qry_boid.iter().count());
+    format!("{} + {}/{}", player.score, tamed, tamed + wild);
 }
 
 pub fn calc_player_direction(

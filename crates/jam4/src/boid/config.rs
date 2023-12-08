@@ -93,7 +93,7 @@ impl FromWorld for BoidConfig {
       min_turn_speed: 1.0,
       max_turn_speed: 5.0,
       player_influence: 100.,
-      boundary: 5.0,
+      boundary: 50.0,
       cohesion: 1.0,
       alignment: 1.0,
       repulsion: 10.0,

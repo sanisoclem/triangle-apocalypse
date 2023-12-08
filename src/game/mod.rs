@@ -6,19 +6,22 @@ use jam4::SimulationState;
 use utils::despawn_screen;
 
 use self::{
-  controls::{calc_player_direction, setup_player_ui, update_player_ui, InPlayingScreen, toggle_player_mode},
-  debug::boid_config_debug,
+  controls::{
+    calc_player_direction, setup_player_ui, toggle_player_mode, update_player_ui, InPlayingScreen,
+  },
   game_over::{on_game_over, wait_to_retry, InGameOverScreen},
   gg::on_game_complete,
   grid::{build_grid, GridMaterial},
-  level_complete::{wait_to_next_level, InLevelCompleteScreen, setup_level_complete},
+  level_complete::{setup_level_complete, wait_to_next_level, InLevelCompleteScreen},
 };
+
 mod controls;
 mod game_over;
 mod gg;
 mod level_complete;
 
 mod camera;
+#[cfg(feature = "debug")]
 mod debug;
 mod grid;
 
@@ -66,13 +69,19 @@ impl GameExtensions for App {
             calc_player_direction,
             toggle_player_mode,
             follow_player,
-            boid_config_debug,
             update_player_ui,
           )
             .run_if(in_state(SimulationState::Simulating)),
           wait_to_retry.run_if(in_state(SimulationState::GameOver)),
           wait_to_next_level.run_if(in_state(SimulationState::LevelComplete)),
         ),
-      )
+      );
+    #[cfg(feature = "debug")]
+    self.add_systems(
+      Update,
+      debug::boid_config_debug.run_if(in_state(SimulationState::Simulating)),
+    );
+
+    self
   }
 }

@@ -102,23 +102,32 @@ pub fn calculate_boid_direction(
 }
 
 pub fn update_tamed_boids(
-  mut qry: Query<(&mut Boid, Option<&TamedBoid>), (Without<Player>, Changed<TamedBoid>)>,
+  mut qry: Query<&mut Boid>,
+  added: Query<Entity, Added<TamedBoid>>,
+  mut removed: RemovedComponents<TamedBoid>,
   player: Res<PlayerInfo>,
   bconfig: Res<BoidConfig>,
 ) {
-  for (mut boid, tamed) in qry.iter_mut() {
-    if tamed.is_some() {
-      if player.in_boost_mode {
-        boid.speed = bconfig.max_speed;
-        boid.turning_speed = bconfig.min_turn_speed;
-      } else {
-        boid.speed = bconfig.min_speed;
-        boid.turning_speed = bconfig.max_turn_speed;
-      }
+  for (entity) in added.iter() {
+    let Ok(mut boid) = qry.get_mut(entity) else {
+      continue;
+    };
+
+    if player.in_boost_mode {
+      boid.speed = bconfig.max_speed;
+      boid.turning_speed = bconfig.min_turn_speed;
     } else {
       boid.speed = bconfig.min_speed;
       boid.turning_speed = bconfig.max_turn_speed;
     }
+  }
+
+  for entity in removed.read() {
+    let Ok(mut boid) = qry.get_mut(entity) else {
+      continue;
+    };
+    boid.speed = bconfig.min_speed;
+    boid.turning_speed = bconfig.max_turn_speed;
   }
 }
 

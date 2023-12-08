@@ -9,3 +9,9 @@ $ wasm-bindgen --out-name jam4 \
   --target web target/wasm32-unknown-unknown/wasm-release/bevy-jam-4.wasm
 $ basic-http-server wasm
 ```
+
+[WASM](https://shape-shepherd-sanisoclem.vercel.app/)
+
+Known issues:
+ - wasm build uses webgpu (needed for compute shaders created by `bevy_hanabi`) and only works in chrome
+ - particle effects in Chrome in windows is buggy

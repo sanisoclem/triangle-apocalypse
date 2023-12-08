@@ -156,7 +156,7 @@ impl Default for PlayerBundle {
         is_player: true,
         personal_space: 100.,
         turning_speed: 5.,
-        vision: 500.0,
+        vision: 800.0,
         ..default()
       },
       compiled_effect: CompiledParticleEffect::default(),

@@ -107,7 +107,7 @@ pub fn on_load_level_requested(
           Moveable::default(),
           Boid {
             direction: Mat2::from_angle(x as f32).mul_vec2(Vec2::Y),
-            turning_speed: bconfig.min_turn_speed,
+            turning_speed: bconfig.max_turn_speed,
             speed: bconfig.min_speed,
             ..default()
           },
