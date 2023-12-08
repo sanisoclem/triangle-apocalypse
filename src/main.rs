@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
+use bevy_hanabi::HanabiPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use game::GameExtensions;
 use jam4::Jam4Extensions;
 use splash::SplashExtensions;
@@ -34,8 +36,9 @@ fn main() {
     ))
     .add_state::<AppState>()
     .add_splash_screen(AppState::Splash, AppState::Game)
-    //.add_plugins(WorldInspectorPlugin::default())
     .add_plugins(EguiPlugin)
+    .add_plugins(WorldInspectorPlugin::default())
+    .add_plugins(HanabiPlugin)
     .add_jam_game()
     .add_game(AppState::Game)
     .run();

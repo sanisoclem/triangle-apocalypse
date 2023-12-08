@@ -5,6 +5,9 @@ use crate::moveable::MoveableBounds;
 use super::BoidConfig;
 
 #[derive(Component)]
+pub struct TamedBoid;
+
+#[derive(Component)]
 pub struct Boid {
   pub direction: Vec2,
   pub vision: f32,
@@ -22,7 +25,7 @@ impl Default for Boid {
       personal_space: 50.0,
       is_player: false,
       speed: 500.,
-      turning_speed: 4.0,
+      turning_speed: 10.0,
     }
   }
 }

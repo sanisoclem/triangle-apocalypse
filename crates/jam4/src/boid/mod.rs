@@ -1,4 +1,7 @@
-use crate::moveable::{Moveable, MoveableBounds};
+use crate::{
+  moveable::{CollidedWithBounds, Moveable, MoveableBounds},
+  Player,
+};
 use bevy::prelude::*;
 
 mod components;
@@ -7,7 +10,40 @@ mod config;
 pub use components::*;
 pub use config::*;
 
-// pub fn spawn_boids(mut cmd: Commands, mut spawner: )
+pub fn despawn_collided_boids(
+  mut cmd: Commands,
+  qry: Query<Entity, (With<Boid>, Added<CollidedWithBounds>)>,
+) {
+  for e in qry.iter() {
+    cmd.entity(e).despawn_recursive();
+  }
+}
+
+pub fn update_boid_color(
+  mut cmd: Commands,
+  mut qry: Query<(Entity, &Transform, &mut Handle<ColorMaterial>), (With<Boid>, Without<Player>)>,
+  qry_player: Query<(&Transform, &Player)>,
+  mut gizmos: Gizmos,
+  bconfig: Res<BoidConfig>,
+) {
+  let Ok((p_trans, p)) = qry_player.get_single() else {
+    return;
+  };
+
+  gizmos.circle_2d(p_trans.translation.xy(), p.influence_radius, Color::RED);
+
+  for (e, transform, mut boid_color) in qry.iter_mut() {
+    if transform.translation.distance_squared(p_trans.translation)
+      <= p.influence_radius * p.influence_radius
+    {
+      cmd.entity(e).insert(TamedBoid);
+      *boid_color = bconfig.color_tamed.clone();
+    } else {
+      cmd.entity(e).remove::<TamedBoid>();
+      *boid_color = bconfig.color_wild.clone();
+    }
+  }
+}
 
 pub fn draw_boid_gizmos(
   qry: Query<(&Transform, &Boid)>,

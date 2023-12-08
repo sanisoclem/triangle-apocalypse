@@ -1,0 +1,54 @@
+thread 'rustc' panicked at /rustc/0e2dac8375950a12812ec65868e42b43ed214ef9\compiler\rustc_query_system\src\query\plumbing.rs:721:9:
+Found unstable fingerprints for implementations_of_trait(f92ee0346ed26b83-97014155deab39e8): [(DefId(263:473 ~ bevy_gizmos[f04d]::pipeline_3d::{impl#8}), Some(Adt(DefId(263:465 ~ bevy_gizmos[f04d]::pipeline_3d::LineGizmoPipelineKey)))), (DefId(263:452 ~ bevy_gizmos[f04d]::pipeline_2d::{impl#8}), Some(Adt(DefId(263:445 ~ bevy_gizmos[f04d]::pipeline_2d::LineGizmoPipelineKey))))]
+stack backtrace:
+   0:     0x7ffba33fddff - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   1:     0x7ffba33fdd64 - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   2:     0x7ffba7dbc809 - <tracing_subscriber[ffa68c423620bd77]::util::TryInitError as core[af6b10dabc404445]::fmt::Display>::fmt
+   3:     0x7ffba3416ea3 - std::panicking::rust_panic_with_hook::hf41a427add849925
+   4:     0x7ffba3416d45 - <std::panicking::begin_panic_handler::StaticStrPayload as core::panic::PanicPayload>::take_box::h5b889be2aedab7f6
+   5:     0x7ffba3413ee9 - <std::sys_common::backtrace::_print::DisplayBacktrace as core::fmt::Display>::fmt::h727175ac663d571a
+   6:     0x7ffba3416a54 - rust_begin_unwind
+   7:     0x7ffba346b697 - core::panicking::panic_fmt::h6d8d22bd10df0bf7
+   8:     0x7ffba89f9d3a - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::depth_limit_error
+   9:     0x7ffba774ffde - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  10:     0x7ffba772f284 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  11:     0x7ffba768218c - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  12:     0x7ffba7c5279f - rustc_middle[2a0a5cf741684306]::ty::trait_def::trait_impls_of_provider
+  13:     0x7ffba689a0c2 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  14:     0x7ffba68e17b3 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  15:     0x7ffba7711ee7 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  16:     0x7ffba690221b - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  17:     0x7ffba88b6baf - <rustc_span[ee53f109a0241cc3]::def_id::DefIndex as rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::SpecIntoSelfProfilingString>::spec_to_self_profile_string
+  18:     0x7ffba7688dab - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  19:     0x7ffba7688d43 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  20:     0x7ffba76888ea - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  21:     0x7ffba69037c7 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  22:     0x7ffba68c9ff2 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  23:     0x7ffba65f26ef - <rustc_hir_analysis[7cd3e8c40d350359]::variance::variance_of_opaque::{closure#0}::OpaqueTypeLifetimeCollector as rustc_type_ir[f7ae084980408b7b]::visit::TypeVisitor<rustc_middle[2a0a5cf741684306]::ty::context::TyCtxt>>::visit_ty
+  24:     0x7ffba6f46ecb - rustc_hir_analysis[7cd3e8c40d350359]::check_crate
+  25:     0x7ffba6cf76fa - rustc_interface[e330ae9bf70e033a]::passes::analysis
+  26:     0x7ffba689d69d - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  27:     0x7ffba68c8d99 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  28:     0x7ffba68f0cbc - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  29:     0x7ffba690c047 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  30:     0x7ffba68f3d73 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  31:     0x7ffba3da982d - rustc_driver_impl[a6f680b6cbbb196d]::main
+  32:     0x7ffba3db5e20 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  33:     0x7ffba3deeec3 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  34:     0x7ffba3db1e6a - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  35:     0x7ffba3def9f1 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  36:     0x7ffba3db465f - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  37:     0x7ffba3db4778 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  38:     0x7ffba3428f4c - std::sys::windows::thread::Thread::new::hfbde1f52ebd2d066
+  39:     0x7ffcc8ec257d - BaseThreadInitThunk
+  40:     0x7ffcc9f4aa58 - RtlUserThreadStart
+
+
+rustc version: 1.76.0-nightly (0e2dac837 2023-12-04)
+platform: x86_64-pc-windows-msvc
+
+query stack during panic:
+#0 [implementations_of_trait] looking up implementations of a trait in a crate
+#1 [trait_impls_of] finding trait impls of `core::cmp::Eq`
+#2 [analysis] running analysis passes on this crate
+end of query stack

@@ -1,9 +1,11 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy_hanabi::prelude::*;
 use bevy_smud::ShapeBundle;
 
 use crate::{
-  moveable::{CollidedWithBounds, MoveableBounds},
-  Player, PlayerBundle, Simulation, SimulationState,
+  boid::{Boid, BoidConfig},
+  moveable::{CollidedWithBounds, Moveable, MoveableBounds},
+  spawn_player, Player, PlayerInfo, Simulation, SimulationState,
 };
 
 mod registry;
@@ -45,11 +47,14 @@ pub fn on_load_level_requested(
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
 
+  mut bconfig: Res<BoidConfig>,
+  mut player: ResMut<PlayerInfo>,
   mut bounds: ResMut<MoveableBounds>,
   mut meshes: ResMut<Assets<Mesh>>,
   mut materials: ResMut<Assets<ColorMaterial>>,
   to_despawn: Query<Entity, With<Simulation>>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
+  mut effects: ResMut<Assets<EffectAsset>>,
 ) {
   let Some(id_to_load) = lvl_mgr.load_next else {
     return;
@@ -66,6 +71,7 @@ pub fn on_load_level_requested(
     cmd
       .spawn(ShapeBundle {
         shape: shape.clone(),
+        transform: Transform::from_translation(Vec2::splat(0.0).extend(-10.0)),
         ..default()
       })
       .insert(Simulation);
@@ -74,7 +80,7 @@ pub fn on_load_level_requested(
     cmd
       .spawn(ShapeBundle {
         shape: shape.clone(),
-        transform: Transform::from_translation(*tx),
+        transform: Transform::from_translation(tx.extend(-10.0)),
         ..default()
       })
       .insert(Simulation);
@@ -83,16 +89,45 @@ pub fn on_load_level_requested(
   // update bounds
   *bounds = to_load.bounds.clone();
 
-  // TODO: create resource to define player entity
-  cmd
-    .spawn(PlayerBundle {
-      mesh: meshes.add(shape::RegularPolygon::new(20., 3).into()).into(),
-      material: materials.add(ColorMaterial::from(Color::rgb(7.5, 0.0, 7.5))),
-      transform: Transform::from_translation(Vec3::new(0., 0., 0.0))
-        .with_scale(Vec3::new(1.0, 2.0, 1.0)),
-      ..default()
-    })
-    .insert(Simulation);
+  spawn_player(
+    &mut cmd,
+    &mut player,
+    &mut meshes,
+    &mut materials,
+    &mut effects,
+    to_load.starting_point,
+  )
+  .insert(Simulation);
+
+  for point in to_load.spawn_points.iter() {
+    for x in 0..to_load.boids_per_spawn_point {
+      cmd
+        .spawn(MaterialMesh2dBundle {
+          mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
+          material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
+          transform: Transform::from_translation(
+            point.extend(0.0) + Vec3::new(x as f32 * 23., 0.0, 0.0),
+          )
+          .with_scale(Vec3::new(1.0, 2.0, 1.0)),
+          ..default()
+        })
+        .insert((
+          Moveable::default(),
+          Boid {
+            direction: Mat2::from_angle(x as f32).mul_vec2(Vec2::Y),
+            ..default()
+          },
+          Simulation,
+        ))
+        .with_children(|p| {
+          p.spawn((ParticleEffectBundle {
+            effect: ParticleEffect::new(bconfig.cotrails.clone()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
+            ..Default::default()
+          },));
+        });
+    }
+  }
 
   // TODO: start playing when game starts
   cmd

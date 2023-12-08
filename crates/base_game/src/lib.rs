@@ -91,12 +91,19 @@ fn build_level1(asset_server: &AssetServer) -> LevelInfo {
   let lvl = LevelInfo {
     bounds: MoveableBounds::from_sdf(shape),
     finish_bounds: MoveableBounds::from_sdf(finish_bounds),
-    finish_bounds_sdf: Some((fs, Vec3::new(0.0, 9000., 0.0))),
+    finish_bounds_sdf: Some((fs, Vec2::new(0.0, 9000.))),
     bounds_sdf: Some(s),
     music: asset_server.load("preload/battle_1.ogg"),
     name: "Level 1".to_owned(),
     next_level: None,
-    starting_point: Vec2::ZERO,
+    starting_point: Vec2::new(0.0, - 9000.),
+    // starting_point: Vec2::ZERO,
+    boids_per_spawn_point: 10,
+    spawn_points: vec![
+      Vec2::new(0., 600.),
+      Vec2::new(0., -8800.),
+      Vec2::new(0., 1200.),
+    ],
   };
   lvl
 }
@@ -129,12 +136,14 @@ fn build_level2(asset_server: &AssetServer) -> LevelInfo {
   let lvl = LevelInfo {
     bounds: MoveableBounds::from_sdf(shape),
     finish_bounds: MoveableBounds::from_sdf(finish_bounds),
-    finish_bounds_sdf: Some((fs, Vec3::new(0.0, 9000., 0.0))),
+    finish_bounds_sdf: Some((fs, Vec2::new(0.0, 9000.))),
     bounds_sdf: Some(s),
     music: asset_server.load("preload/battle_1.ogg"),
     name: "Level 2".to_owned(),
     next_level: None,
     starting_point: Vec2::ZERO,
+    boids_per_spawn_point: 10,
+    spawn_points: vec![Vec2::new(0., 300.), Vec2::new(0., 600.)],
   };
   lvl
 }

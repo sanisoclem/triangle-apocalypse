@@ -8,3 +8,4 @@ bevy = { workspace = true }
 sdfu = { workspace = true }
 bevy_smud = { workspace = true }
 utils = { path = "../utils", version = "0.1.0" }
+bevy_hanabi = { workspace = true }
