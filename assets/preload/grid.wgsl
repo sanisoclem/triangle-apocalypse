@@ -69,31 +69,10 @@ fn vertex(vertex: Vertex) -> VertexOutput {
     return out;
 }
 
-fn oklab_to_linear_srgb(c: vec3<f32>) -> vec3<f32> {
-    let L = c.x;
-    let a = c.y;
-    let b = c.z;
-
-    let l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-    let m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-    let s_ = L - 0.0894841775 * a - 1.2914855480 * b;
-
-    let l = l_ * l_ * l_;
-    let m = m_ * m_ * m_;
-    let s = s_ * s_ * s_;
-
-    return vec3<f32>(
-        4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-        -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
-    );
-}
-
 /// Entry point for the fragment shader
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let speed = 1.0;
-    var rand = fract(in.position.x * 123.4112 + in.position.y *42.3185 + in.position.z * 4213.3212);
 
     let t_1 = sin(globals.time * speed ) * 0.5 + 0.5;
     let t_2 = cos(globals.time * speed);
@@ -114,14 +93,16 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let warp_mode = 1.0; //t_1;
 
     let small_grid = pristine_grid(in.uv * 750. * 2. * warp_mode,  0.01 , 1.0);
-    let big_grid = pristine_grid(in.uv * 750.* .25 * warp_mode,  0.01 , 1.0);
+    let big_grid = pristine_grid(in.uv * 750.* .5 * warp_mode,  0.01 , 1.0);
     let faint_grid = pristine_grid(in.uv * 750.* 2. * warp_mode,  0.001 , 1.0)* blue * 0.2;
-    let vertical_lines = pristine_grid(in.uv * 750.* warp_mode * .125,  0.003, 0.0);
+    let vertical_lines = pristine_grid(in.uv * 750.* warp_mode  *0.5,  0.003, 0.0);
 
 
-    var x1 = (cos(in.world_position.x / 1200.) *sin(in.world_position.x / 1500.)); //sin(floor((in.world_position.x) /100.));
+
+    var x1 = -cos(in.world_position.x / 1000.) + (0.5* -cos(in.world_position.x / 200.) *cos(in.world_position.x / 130.) * cos(in.world_position.x / 70.) ); //sin(floor((in.world_position.x) /100.));
     var y1 = pow(fract((in.world_position.y + (x1 * 10000.) - (globals.time * 1000.)) /10000.), 20.);
-    var y2 = pow( fract((in.world_position.y - (globals.time * 1000.)) /10000.),20.);
+    var y2 = pow(fract((in.world_position.y - (globals.time * 1300.)) /10000.),20.);
+
 
     var f = 0.0;
     if y2 >= 0.995 {
@@ -129,10 +110,5 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     let color = max(max(faint_grid, vertical_lines * orange * y1), max(f, max(small_grid, big_grid)) * y2 * blue* 0.5);
-    // let color = vec3<f32>(y1);
-
-    //return vec4<f32>(mix(g1,g2,1.0), 1.0);
-    // return vec4<f32>(vec3<f32>(grid * y1) * mix(blue,green,t_2) , 1.);
-    // return vec4<f32>(vec3<f32>(x1) * blue, 1.);
     return vec4<f32>(color, 1.);
 }
