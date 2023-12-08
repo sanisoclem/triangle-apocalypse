@@ -1,9 +1,7 @@
-use std::fmt::format;
-
 use bevy::prelude::*;
 use jam4::{
   level::{LevelManager, LevelRegistry},
-  GameControlCommand,
+  GameControlCommand, PlayerInfo,
 };
 use utils::text::TextAnimation;
 
@@ -26,6 +24,7 @@ pub fn setup_level_complete(
   lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
   mut cmds: EventWriter<GameControlCommand>,
+  player: Res<PlayerInfo>,
 ) {
   let level_id = lvl_mgr.current_level.unwrap();
   let lvl = lvl_reg.get_level(&level_id);
@@ -68,7 +67,10 @@ pub fn setup_level_complete(
           }),
         )
         .insert(TextAnimation {
-          text: format!("{} complete\nPress space to continue", lvl.name),
+          text: format!(
+            "{} complete\nYou herded {} shapes so far\nPress space to continue",
+            lvl.name, player.score
+          ),
           animation_speed: 1.0,
         });
     });

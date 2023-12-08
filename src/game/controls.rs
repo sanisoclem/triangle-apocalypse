@@ -1,8 +1,8 @@
 use bevy::prelude::*;
+use bevy_hanabi::ParticleEffect;
 use jam4::{
-  boid::{Boid, BoidConfig},
-  moveable::Moveable,
-  Player,
+  boid::{Boid, BoidConfig, TamedBoid},
+  Player, PlayerInfo,
 };
 
 use utils::colors::*;
@@ -11,7 +11,7 @@ use utils::colors::*;
 pub struct InPlayingScreen;
 
 #[derive(Component)]
-pub struct SpeedBar;
+pub struct ScoreBoard;
 
 pub fn setup_player_ui(mut cmd: Commands) {
   cmd
@@ -19,7 +19,7 @@ pub fn setup_player_ui(mut cmd: Commands) {
       NodeBundle {
         style: Style {
           width: Val::Percent(100.0),
-          height: Val::Px(10.0),
+          height: Val::Px(100.0),
           bottom: Val::Px(0.0),
           position_type: PositionType::Absolute,
           ..default()
@@ -31,47 +31,44 @@ pub fn setup_player_ui(mut cmd: Commands) {
     ))
     .with_children(|parent| {
       parent
-        .spawn(NodeBundle {
-          style: Style {
-            position_type: PositionType::Relative,
-            width: Val::Percent(50.0),
-            height: Val::Percent(100.0),
+        .spawn(TextBundle {
+          text: Text {
+            sections: vec![TextSection {
+              value: "".to_owned(),
+              style: TextStyle {
+                font_size: 80.,
+                color: utils::colors::FAIRY,
+                ..default()
+              },
+            }],
+            alignment: TextAlignment::Right,
             ..default()
           },
-          background_color: BackgroundColor(Color::rgb_u8(244, 175, 45)),
           ..default()
         })
-        .insert(SpeedBar);
+        .insert(ScoreBoard);
     });
 }
 
 pub fn update_player_ui(
-  mut qry_ui: Query<&mut Style, With<SpeedBar>>,
-  qry: Query<(&Boid, &Moveable), With<Player>>,
-  bconfig: Res<BoidConfig>,
+  qry_boid: Query<Entity, (With<Boid>, With<TamedBoid>, Without<Player>)>,
+  mut qry_ui: Query<&mut Text, With<ScoreBoard>>,
+  player: Res<PlayerInfo>,
 ) {
-  let Ok(mut style) = qry_ui.get_single_mut() else {
+  let Ok(mut txt) = qry_ui.get_single_mut() else {
     return;
   };
-  let Ok((boid, _m)) = qry.get_single() else {
-    return;
-  };
-
-  style.width = Val::Percent(
-    10. + (boid.speed - bconfig.min_speed) / (bconfig.max_speed - bconfig.min_speed) * 90.0,
-  );
+  txt.sections.first_mut().unwrap().value =
+    format!("{} + {}", player.score, qry_boid.iter().count());
 }
 
 pub fn calc_player_direction(
   mut qry: Query<&mut Boid, With<Player>>,
   keyboard_input: Res<Input<KeyCode>>,
   time: Res<Time>,
-  bconfig: Res<BoidConfig>,
 ) {
   if let Ok(mut p) = qry.get_single_mut() {
-    let acceleration = 600.;
     let mut turning_force = Vec2::ZERO;
-    let mut delta_acceleration = 0.;
 
     if keyboard_input.pressed(KeyCode::A) {
       turning_force += Mat2::from_angle(90.0f32.to_radians()).mul_vec2(p.direction);
@@ -79,15 +76,35 @@ pub fn calc_player_direction(
       turning_force += Mat2::from_angle(-90.0f32.to_radians()).mul_vec2(p.direction);
     }
 
-    if keyboard_input.pressed(KeyCode::W) {
-      delta_acceleration = acceleration;
-    } else if keyboard_input.pressed(KeyCode::S) {
-      delta_acceleration = -acceleration;
-    }
-
     p.direction =
       (p.direction + (turning_force * time.delta_seconds() * p.turning_speed)).normalize();
-    p.speed = (p.speed + (delta_acceleration * time.delta_seconds()))
-      .clamp(bconfig.min_speed, bconfig.max_speed);
+  }
+}
+
+pub fn toggle_player_mode(
+  mut qry: Query<(&mut ParticleEffect, &mut Boid, &mut Handle<ColorMaterial>), With<Player>>,
+  keyboard_input: Res<Input<KeyCode>>,
+  mut player: ResMut<PlayerInfo>,
+  bconfig: Res<BoidConfig>,
+) {
+  if !keyboard_input.just_pressed(KeyCode::Space) {
+    return;
+  }
+  let Ok((mut fx, mut boid, mut mat)) = qry.get_single_mut() else {
+    return;
+  };
+
+  player.in_boost_mode = !player.in_boost_mode;
+
+  if player.in_boost_mode {
+    fx.handle = player.boost_particles.clone();
+    *mat = player.boost_color.clone();
+    boid.speed = bconfig.max_speed;
+    boid.turning_speed = bconfig.min_turn_speed;
+  } else {
+    fx.handle = player.normal_particles.clone();
+    *mat = player.normal_color.clone();
+    boid.speed = bconfig.min_speed;
+    boid.turning_speed = bconfig.max_turn_speed;
   }
 }

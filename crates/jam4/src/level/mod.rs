@@ -3,7 +3,7 @@ use bevy_hanabi::prelude::*;
 use bevy_smud::ShapeBundle;
 
 use crate::{
-  boid::{Boid, BoidConfig},
+  boid::{Boid, BoidConfig, TamedBoid},
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
   spawn_player, Player, PlayerInfo, Simulation, SimulationState,
 };
@@ -17,6 +17,8 @@ pub fn check_if_level_complete(
   mut next_sim_state: ResMut<NextState<SimulationState>>,
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
+  qry_boid: Query<Entity, (With<Boid>, With<TamedBoid>, Without<Player>)>,
+  mut player: ResMut<PlayerInfo>,
 ) {
   let Ok(t) = qry.get_single() else {
     return;
@@ -27,6 +29,7 @@ pub fn check_if_level_complete(
   if lvl.finish_bounds.distance_to_edge(t.translation.xy()) < 0.0 {
     // hit the finish line
     lvl_mgr.level_complete = true;
+    player.score += qry_boid.iter().count() as u32;
     next_sim_state.set(SimulationState::LevelComplete);
   }
 }
@@ -46,15 +49,12 @@ pub fn on_load_level_requested(
   mut cmd: Commands,
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
-
-  mut bconfig: Res<BoidConfig>,
-  mut player: ResMut<PlayerInfo>,
+  bconfig: Res<BoidConfig>,
+  player: ResMut<PlayerInfo>,
   mut bounds: ResMut<MoveableBounds>,
   mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<ColorMaterial>>,
   to_despawn: Query<Entity, With<Simulation>>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
-  mut effects: ResMut<Assets<EffectAsset>>,
 ) {
   let Some(id_to_load) = lvl_mgr.load_next else {
     return;
@@ -89,22 +89,14 @@ pub fn on_load_level_requested(
   // update bounds
   *bounds = to_load.bounds.clone();
 
-  spawn_player(
-    &mut cmd,
-    &mut player,
-    &mut meshes,
-    &mut materials,
-    &mut effects,
-    to_load.starting_point,
-  )
-  .insert(Simulation);
+  spawn_player(&mut cmd, &player, to_load.starting_point).insert(Simulation);
 
   for point in to_load.spawn_points.iter() {
     for x in 0..to_load.boids_per_spawn_point {
       cmd
         .spawn(MaterialMesh2dBundle {
           mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
-          material: materials.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5))),
+          material: bconfig.color_wild.clone(),
           transform: Transform::from_translation(
             point.extend(0.0) + Vec3::new(x as f32 * 23., 0.0, 0.0),
           )
@@ -115,6 +107,8 @@ pub fn on_load_level_requested(
           Moveable::default(),
           Boid {
             direction: Mat2::from_angle(x as f32).mul_vec2(Vec2::Y),
+            turning_speed: bconfig.min_turn_speed,
+            speed: bconfig.min_speed,
             ..default()
           },
           Simulation,
@@ -149,14 +143,16 @@ pub fn find_level_to_load(
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
+  mut player: ResMut<PlayerInfo>,
 ) {
   if let Some(cur_lvl) = lvl_mgr.current_level {
     if !lvl_mgr.level_complete {
+      player.in_boost_mode = false;
       lvl_mgr.load_level(&cur_lvl);
     } else {
       // level complete
       let cur = lvl_reg.get_level(&cur_lvl);
-
+      player.in_boost_mode = false;
       if let Some(next) = cur.next_level {
         // load next level
         info!("loading next level");

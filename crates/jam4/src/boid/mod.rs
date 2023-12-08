@@ -1,6 +1,6 @@
 use crate::{
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
-  Player,
+  Player, PlayerInfo,
 };
 use bevy::prelude::*;
 
@@ -19,26 +19,25 @@ pub fn despawn_collided_boids(
   }
 }
 
-pub fn update_boid_color(
+pub fn calc_tamed_boids(
   mut cmd: Commands,
   mut qry: Query<(Entity, &Transform, &mut Handle<ColorMaterial>), (With<Boid>, Without<Player>)>,
-  qry_player: Query<(&Transform, &Player)>,
-  mut gizmos: Gizmos,
+  qry_player: Query<(&Transform, &Boid), With<Player>>,
+  qry_check: Query<Entity, (With<Boid>, Without<Player>, With<TamedBoid>)>,
   bconfig: Res<BoidConfig>,
 ) {
-  let Ok((p_trans, p)) = qry_player.get_single() else {
+  let Ok((p_trans, p_boid)) = qry_player.get_single() else {
     return;
   };
-
-  gizmos.circle_2d(p_trans.translation.xy(), p.influence_radius, Color::RED);
-
   for (e, transform, mut boid_color) in qry.iter_mut() {
-    if transform.translation.distance_squared(p_trans.translation)
-      <= p.influence_radius * p.influence_radius
-    {
+    let prev_is_tamed = qry_check.get(e).is_ok();
+    let is_tamed =
+      transform.translation.distance_squared(p_trans.translation) <= p_boid.vision * p_boid.vision;
+    if is_tamed && !prev_is_tamed {
       cmd.entity(e).insert(TamedBoid);
       *boid_color = bconfig.color_tamed.clone();
-    } else {
+    }
+    if !is_tamed && prev_is_tamed {
       cmd.entity(e).remove::<TamedBoid>();
       *boid_color = bconfig.color_wild.clone();
     }
@@ -65,7 +64,7 @@ pub fn draw_boid_gizmos(
 }
 
 pub fn calculate_boid_direction(
-  mut qry: Query<(Entity, &Transform, &mut Boid)>,
+  mut qry: Query<(Entity, &Transform, &mut Boid, Option<&TamedBoid>)>,
   mut gizmos: Gizmos,
   bounds: Res<MoveableBounds>,
   bconfig: Res<BoidConfig>,
@@ -73,24 +72,52 @@ pub fn calculate_boid_direction(
 ) {
   let changes = qry
     .iter()
-    .map(|(e, t1, boid)| {
+    .map(|(e, t1, boid, tamed)| {
       let pos = t1.translation.xy();
-      let force = boid.calculate_forces(&qry, &bconfig, pos, &bounds);
+      let (force, speed_change) = boid.calculate_forces(&qry, &bconfig, pos, &bounds, &mut gizmos);
 
       if bconfig.show_forces {
         gizmos.ray_2d(pos, force * boid.vision, Color::CYAN);
       }
 
-      (e, force, pos)
+      (e, force, pos, speed_change, tamed.is_some())
     })
     .collect::<Vec<_>>();
 
-  for (e, f, pos) in changes.iter() {
-    let (_, _, mut b) = qry.get_mut(*e).unwrap();
+  for (e, f, pos, speed_change, is_tamed) in changes.iter() {
+    let (_, _, mut b, _) = qry.get_mut(*e).unwrap();
+
     b.direction = (b.direction + (*f * time.delta_seconds() * b.turning_speed)).normalize();
+
+    if *is_tamed {
+      b.speed = b.speed + (speed_change - b.speed);
+    } else if !b.is_player {
+      b.speed = bconfig.min_speed;
+    }
 
     if bconfig.show_direction {
       gizmos.ray_2d(*pos, b.direction * 100.0, Color::BLUE);
+    }
+  }
+}
+
+pub fn update_tamed_boids(
+  mut qry: Query<(&mut Boid, Option<&TamedBoid>), (Without<Player>, Changed<TamedBoid>)>,
+  player: Res<PlayerInfo>,
+  bconfig: Res<BoidConfig>,
+) {
+  for (mut boid, tamed) in qry.iter_mut() {
+    if tamed.is_some() {
+      if player.in_boost_mode {
+        boid.speed = bconfig.max_speed;
+        boid.turning_speed = bconfig.min_turn_speed;
+      } else {
+        boid.speed = bconfig.min_speed;
+        boid.turning_speed = bconfig.max_turn_speed;
+      }
+    } else {
+      boid.speed = bconfig.min_speed;
+      boid.turning_speed = bconfig.max_turn_speed;
     }
   }
 }

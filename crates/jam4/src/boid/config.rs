@@ -5,6 +5,8 @@ use bevy_hanabi::prelude::*;
 pub struct BoidConfig {
   pub max_speed: f32,
   pub min_speed: f32,
+  pub min_turn_speed: f32,
+  pub max_turn_speed: f32,
   pub boundary: f32,
   pub cohesion: f32,
   pub alignment: f32,
@@ -64,7 +66,7 @@ impl FromWorld for BoidConfig {
     let spawner = Spawner::rate(20.0.into());
     let effect = effects.add(
       EffectAsset::new(4096, spawner, writer.finish())
-        .with_name("2d")
+        .with_name("boid_effects")
         .init(init_pos)
         .init(init_vel)
         .init(init_age)
@@ -88,7 +90,9 @@ impl FromWorld for BoidConfig {
     BoidConfig {
       max_speed: 1000.,
       min_speed: 500.,
-      player_influence: 10.,
+      min_turn_speed: 1.0,
+      max_turn_speed: 5.0,
+      player_influence: 100.,
       boundary: 5.0,
       cohesion: 1.0,
       alignment: 1.0,

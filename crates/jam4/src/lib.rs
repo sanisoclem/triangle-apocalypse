@@ -10,8 +10,8 @@ mod player;
 mod state;
 
 use boid::{
-  calculate_boid_direction, despawn_collided_boids, draw_boid_gizmos, update_boid_color,
-  update_boid_velocity, BoidConfig,
+  calc_tamed_boids, calculate_boid_direction, despawn_collided_boids, draw_boid_gizmos,
+  update_boid_velocity, update_tamed_boids, BoidConfig,
 };
 pub use components::*;
 use level::{
@@ -53,7 +53,9 @@ impl Jam4Extensions for App {
       )
       .add_systems(
         FixedUpdate,
-        update_boid_color.run_if(in_state(SimulationState::Simulating)),
+        (calc_tamed_boids, update_tamed_boids)
+          .chain()
+          .run_if(in_state(SimulationState::Simulating)),
       )
       .add_systems(
         Update,

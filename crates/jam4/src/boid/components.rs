@@ -58,26 +58,38 @@ impl Boid {
     Vec2::ZERO
   }
 
+  // TODO: clean up this mess
   pub fn calculate_forces(
     &self,
-    qry: &Query<(Entity, &Transform, &mut Boid)>,
+    qry: &Query<(Entity, &Transform, &mut Boid, Option<&TamedBoid>)>,
     bconfig: &BoidConfig,
-    position: Vec2,
+    position2d: Vec2,
     bounds: &MoveableBounds,
-  ) -> Vec2 {
+    _gizmos: &mut Gizmos,
+  ) -> (Vec2, f32) {
     // don't calculate forces for player boid
     if self.is_player {
-      return Vec2::ZERO;
+      return (Vec2::ZERO, self.speed);
     }
 
-    let position2d = position;
     let bounds_force = self.calculate_bounds_force(bconfig, position2d, bounds);
     let mut separation_force = Vec2::ZERO;
     let mut cohesion_force = Vec2::ZERO;
     let mut alignment_force = Vec2::ZERO;
+    let max_dest = position2d + (self.direction * bconfig.max_speed);
+    let min_dest = position2d + (self.direction * bconfig.min_speed);
+    let mut speed_change = 0.0;
 
-    // find all neighbors of e1
-    for (_, t_other, boid_other) in qry.iter() {
+    // gizmos.line_2d(position2d, min_dest, Color::BLUE);
+    // gizmos.line_2d(position2d, max_dest, Color::RED);
+
+    // TODO: optimize
+    for (_, t_other, boid_other, _) in qry.iter() {
+      let factor = if boid_other.is_player {
+        bconfig.player_influence
+      } else {
+        1.0
+      };
       let position2d_other = t_other.translation.xy();
       let diff = position2d_other - position2d;
       let dist = diff.length();
@@ -85,21 +97,45 @@ impl Boid {
       let mag_pspace = dist / maxpspace;
       let mag_vision = dist / self.vision;
 
-      if dist < self.personal_space || dist < boid_other.personal_space {
+      if boid_other.is_player {
+        let player_dest = position2d_other + (boid_other.direction * boid_other.speed);
+
+        // gizmos.line_2d(min_dest, player_dest, Color::BLUE);
+        // gizmos.line_2d(max_dest, player_dest, Color::RED);
+        let max_dist = max_dest.distance(player_dest);
+        let min_dist = min_dest.distance(player_dest);
+        if max_dist > min_dist && max_dist > boid_other.personal_space + self.personal_space {
+          speed_change = bconfig.min_speed;
+        } else if min_dist > max_dist && min_dist > boid_other.personal_space + self.personal_space
+        {
+          speed_change = bconfig.max_speed;
+        }
+      }
+
+      if dist < self.personal_space.max(boid_other.personal_space) {
         separation_force += -diff * (1.0 - mag_pspace);
-      } else if dist < self.vision {
-        // TODO: customize falloff curve
-        cohesion_force += diff;
-        alignment_force += boid_other.direction * (1.0 - mag_vision);
+      } else if dist < self.vision.max(boid_other.vision) {
+        // TODO: customize falloff curve?
+        cohesion_force += diff * factor;
+        alignment_force += boid_other.direction
+          * if boid_other.is_player {
+            1.0
+          } else {
+            1.0 - mag_vision
+          }
+          * factor;
       } else {
         continue;
       }
     }
 
-    ((bounds_force.normalize_or_zero() * bconfig.boundary)
-      + (separation_force.normalize_or_zero() * bconfig.repulsion)
-      + (alignment_force.normalize_or_zero() * bconfig.alignment)
-      + (cohesion_force.normalize_or_zero() * bconfig.cohesion))
-      .normalize_or_zero()
+    (
+      ((bounds_force.normalize_or_zero() * bconfig.boundary)
+        + (separation_force.normalize_or_zero() * bconfig.repulsion)
+        + (alignment_force.normalize_or_zero() * bconfig.alignment)
+        + (cohesion_force.normalize_or_zero() * bconfig.cohesion))
+        .normalize_or_zero(),
+      speed_change,
+    )
   }
 }

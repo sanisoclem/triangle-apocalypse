@@ -78,16 +78,13 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let t_2 = cos(globals.time * speed);
     let t_3 = cos(globals.time * speed / 10.0);
 
-    //let d_1 = fract(distance(in.uv, vec2<f32>(0.5)) *1.4 * 100.);
     let distance_to_center = distance(in.uv, vec2<f32>(0.5)) *1.4;
 
-    // blending is done in a perceptual color space: https://bottosson.github.io/posts/oklab/
     let red = vec3<f32>(10.0, 0.0, 0.0);
     let green = vec3<f32>(0.0, 10.0, 0.0);
     let orange = vec3<f32>(20.0, 0.0, 20.0);
     let blue = vec3<f32>(0.0, 0.0, 10.0);
     let white = vec3<f32>(1.0, 1.0, 1.0);
-    // let mixed = mix(mix(mix(red, blue, t_1), mix(green, white, t_2), t_3), green, distance_to_center);
     let mixed = green * t_1; //white * t_1;
 
     let warp_mode = 1.0; //t_1;

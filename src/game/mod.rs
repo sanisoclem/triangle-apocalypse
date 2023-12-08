@@ -6,7 +6,7 @@ use jam4::SimulationState;
 use utils::despawn_screen;
 
 use self::{
-  controls::{calc_player_direction, setup_player_ui, update_player_ui, InPlayingScreen},
+  controls::{calc_player_direction, setup_player_ui, update_player_ui, InPlayingScreen, toggle_player_mode},
   debug::boid_config_debug,
   game_over::{on_game_over, wait_to_retry, InGameOverScreen},
   gg::on_game_complete,
@@ -64,6 +64,7 @@ impl GameExtensions for App {
         (
           (
             calc_player_direction,
+            toggle_player_mode,
             follow_player,
             boid_config_debug,
             update_player_ui,
