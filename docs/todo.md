@@ -7,6 +7,7 @@
  - ~~[ ] sprites for boid and player~~
  - ~~[ ] particles - on death~~ - not going to do bec of issues with particles on wasm
  - [ ] level design
- - [ ] player abilities
+ - [ ] boundary shaders
+ - [x] player abilities
  - [ ] music & sound effects on death and game over
  - [ ] final build & itch.io page
