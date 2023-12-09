@@ -1,5 +1,4 @@
 use crate::{
-  level::{LevelManager, LevelRegistry},
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
   Player, PlayerInfo,
 };

@@ -171,7 +171,6 @@ pub fn find_level_to_load(
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
-  mut player: ResMut<PlayerInfo>,
 ) {
   if let Some(cur_lvl) = lvl_mgr.current_level {
     if !lvl_mgr.level_complete {

@@ -1,8 +1,5 @@
 use bevy::prelude::*;
-use jam4::{
-  level::{LevelManager, LevelRegistry},
-  GameControlCommand,
-};
+use jam4::level::{LevelManager, LevelRegistry};
 use utils::text::TextAnimation;
 
 use utils::colors::*;
