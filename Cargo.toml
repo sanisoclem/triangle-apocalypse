@@ -12,6 +12,7 @@ base_game = { path = "crates/base_game", version = "0.1.0" }
 utils = { path = "crates/utils", version = "0.1.0" }
 bevy-inspector-egui = { version = "0.21", optional = true }
 bevy_egui = { version = "0.23", optional = true }
+rodio = "*"
 
 [workspace]
 members = ["crates/*"]

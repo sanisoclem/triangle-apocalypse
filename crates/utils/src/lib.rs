@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, Mul, Sub, Add};
 
 use bevy::{
   prelude::*,
@@ -27,4 +27,13 @@ static TEX_SAMPLER_DESC_TILED: Lazy<ImageSamplerDescriptor> =
 
 pub fn tex_settings_tiled(s: &mut ImageLoaderSettings) {
   s.sampler = ImageSampler::Descriptor(TEX_SAMPLER_DESC_TILED.deref().clone());
+}
+
+
+pub fn lerp<T: Copy + Mul<f32, Output = T> + Sub<T, Output = T> + Add<T, Output = T>>(
+  from: T,
+  to: T,
+  f: f32,
+) -> T {
+  from + ((to - from) * f)
 }

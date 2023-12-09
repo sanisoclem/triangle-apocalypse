@@ -18,6 +18,7 @@ enum AppState {
 
 mod game;
 mod splash;
+mod music;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
