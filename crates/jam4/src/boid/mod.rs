@@ -21,25 +21,36 @@ pub fn despawn_collided_boids(
 
 pub fn calc_tamed_boids(
   mut cmd: Commands,
-  mut qry: Query<(Entity, &Transform, &mut Handle<ColorMaterial>), (With<Boid>, Without<Player>)>,
+  mut qry: Query<
+    (Entity, &Transform, &mut Boid, &mut Handle<ColorMaterial>),
+    (With<Boid>, Without<Player>),
+  >,
   qry_player: Query<(&Transform, &Boid), With<Player>>,
   qry_check: Query<Entity, (With<Boid>, Without<Player>, With<TamedBoid>)>,
+  player: Res<PlayerInfo>,
   bconfig: Res<BoidConfig>,
 ) {
   let Ok((p_trans, p_boid)) = qry_player.get_single() else {
     return;
   };
-  for (e, transform, mut boid_color) in qry.iter_mut() {
-    let prev_is_tamed = qry_check.get(e).is_ok();
+  for (e, transform, mut boid, mut color) in qry.iter_mut() {
+    let prev_is_tamed: bool = qry_check.get(e).is_ok();
     let is_tamed =
       transform.translation.distance_squared(p_trans.translation) <= p_boid.vision * p_boid.vision;
     if is_tamed && !prev_is_tamed {
+      if player.in_boost_mode {
+        boid.turning_speed = bconfig.min_turn_speed;
+        *color = bconfig.color_tamed_boosted.clone();
+      } else {
+        boid.turning_speed = bconfig.max_turn_speed;
+        *color = bconfig.color_tamed.clone();
+      }
       cmd.entity(e).insert(TamedBoid);
-      *boid_color = bconfig.color_tamed.clone();
     }
     if !is_tamed && prev_is_tamed {
+      *color = bconfig.color_wild.clone();
+      boid.turning_speed = bconfig.safe_turn_speed;
       cmd.entity(e).remove::<TamedBoid>();
-      *boid_color = bconfig.color_wild.clone();
     }
   }
 }
@@ -102,32 +113,18 @@ pub fn calculate_boid_direction(
 }
 
 pub fn update_tamed_boids(
-  mut qry: Query<&mut Boid>,
-  added: Query<Entity, Added<TamedBoid>>,
-  mut removed: RemovedComponents<TamedBoid>,
+  mut qry: Query<(&mut Boid, &mut Handle<ColorMaterial>), (Without<Player>, With<TamedBoid>)>,
   player: Res<PlayerInfo>,
   bconfig: Res<BoidConfig>,
 ) {
-  for entity in added.iter() {
-    let Ok(mut boid) = qry.get_mut(entity) else {
-      continue;
-    };
-
+  for (mut boid, mut color) in qry.iter_mut() {
     if player.in_boost_mode {
-      boid.speed = bconfig.max_speed;
       boid.turning_speed = bconfig.min_turn_speed;
+      *color = bconfig.color_tamed_boosted.clone();
     } else {
-      boid.speed = bconfig.min_speed;
       boid.turning_speed = bconfig.max_turn_speed;
+      *color = bconfig.color_tamed.clone();
     }
-  }
-
-  for entity in removed.read() {
-    let Ok(mut boid) = qry.get_mut(entity) else {
-      continue;
-    };
-    boid.speed = bconfig.min_speed;
-    boid.turning_speed = bconfig.max_turn_speed;
   }
 }
 

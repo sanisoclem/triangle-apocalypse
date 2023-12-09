@@ -53,7 +53,19 @@ impl Jam4Extensions for App {
       )
       .add_systems(
         FixedUpdate,
-        (calc_tamed_boids, update_tamed_boids)
+        (
+          calc_tamed_boids,
+          apply_deferred,
+          update_tamed_boids,
+          calculate_boid_direction,
+          update_boid_velocity,
+          move_moveables,
+          (
+            check_if_game_over,
+            despawn_collided_boids,
+            check_if_level_complete,
+          ),
+        )
           .chain()
           .run_if(in_state(SimulationState::Simulating)),
       )
@@ -61,22 +73,7 @@ impl Jam4Extensions for App {
         Update,
         (
           process_game_control_commands,
-          (
-            run_mod_update,
-            draw_boid_gizmos,
-            (
-              calculate_boid_direction,
-              update_boid_velocity,
-              move_moveables,
-              (
-                check_if_game_over,
-                despawn_collided_boids,
-                check_if_level_complete,
-              ),
-            )
-              .chain(),
-          )
-            .run_if(in_state(SimulationState::Simulating)),
+          (run_mod_update, draw_boid_gizmos).run_if(in_state(SimulationState::Simulating)),
           wait_until_initialization_complete.run_if(in_state(SimulationState::Initializing)),
         ),
       )

@@ -7,6 +7,7 @@ pub struct BoidConfig {
   pub min_speed: f32,
   pub min_turn_speed: f32,
   pub max_turn_speed: f32,
+  pub safe_turn_speed: f32,
   pub boundary: f32,
   pub cohesion: f32,
   pub alignment: f32,
@@ -23,7 +24,8 @@ pub struct BoidConfig {
   pub player_influence: f32,
   pub cotrails: Handle<EffectAsset>,
   pub color_wild: Handle<ColorMaterial>,
-  pub color_tamed: Handle<ColorMaterial>
+  pub color_tamed: Handle<ColorMaterial>,
+  pub color_tamed_boosted: Handle<ColorMaterial>,
 }
 
 impl FromWorld for BoidConfig {
@@ -80,11 +82,12 @@ impl FromWorld for BoidConfig {
         }),
     );
 
-    let (color_wild, color_tamed) = {
+    let (color_wild, color_tamed, color_tamed_boosted) = {
       let mut mats = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
       let color_wild = mats.add(ColorMaterial::from(Color::rgb_u8(244, 175, 45)));
       let color_tame = mats.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5)));
-      (color_wild, color_tame)
+      let color_tamed_boosted = mats.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 5.0)));
+      (color_wild, color_tame, color_tamed_boosted)
     };
 
     BoidConfig {
@@ -92,6 +95,7 @@ impl FromWorld for BoidConfig {
       min_speed: 500.,
       min_turn_speed: 1.0,
       max_turn_speed: 5.0,
+      safe_turn_speed: 10.0,
       player_influence: 100.,
       boundary: 50.0,
       cohesion: 1.0,
@@ -106,9 +110,10 @@ impl FromWorld for BoidConfig {
       show_personal_space: false,
       show_vision: false,
       show_bounds: true,
-      cotrails:effect,
+      cotrails: effect,
       color_wild,
       color_tamed,
+      color_tamed_boosted,
     }
   }
 }
