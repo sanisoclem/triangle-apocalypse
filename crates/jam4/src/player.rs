@@ -12,6 +12,9 @@ pub struct PlayerInfo {
   pub normal_color: Handle<ColorMaterial>,
   pub boost_particles: Handle<EffectAsset>,
   pub normal_particles: Handle<EffectAsset>,
+  pub audio_boost: Handle<AudioSource>,
+  pub audio_slow: Handle<AudioSource>,
+  // pub audio_die: Handle<AudioSource>,
 }
 
 impl FromWorld for PlayerInfo {
@@ -117,6 +120,13 @@ impl FromWorld for PlayerInfo {
         .into();
       mesh
     };
+    let (audio_boost, audio_slow) = {
+      let asset_server = world.get_resource_mut::<AssetServer>().unwrap();
+      (
+        asset_server.load("preload/607409__colorscrimsontears__upgrade.ogg"),
+        asset_server.load("preload/169994__peepholecircus__power-down.ogg"),
+      )
+    };
     Self {
       boost_color,
       boost_particles,
@@ -125,6 +135,8 @@ impl FromWorld for PlayerInfo {
       normal_color,
       normal_particles,
       score: 0,
+      audio_boost,
+      audio_slow,
     }
   }
 }

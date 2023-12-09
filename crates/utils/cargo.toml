@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 once_cell = "1.18"
+rodio = { workspace = true }

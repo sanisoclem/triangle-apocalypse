@@ -4,6 +4,8 @@ use utils::{despawn_screen, text::TextAnimation};
 
 use utils::colors::*;
 
+use crate::jukebox::{BgMusic, MusicCommand};
+
 pub trait SplashExtensions {
   fn add_splash_screen<T: States + Copy>(&mut self, show_on_state: T, next_state: T) -> &mut Self;
 }
@@ -58,9 +60,30 @@ impl From<&str> for SplashLog {
   }
 }
 
-fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-  let icon = asset_server.load("splash.png");
+fn splash_setup(mut commands: Commands, _asset_server: Res<AssetServer>) {
+  // let icon = asset_server.load("splash.png");
   commands.spawn((Camera2dBundle::default(), OnSplashScreen));
+  commands
+    .spawn((
+      NodeBundle {
+        style: Style {
+          align_items: AlignItems::Start,
+          justify_content: JustifyContent::End,
+          width: Val::Percent(100.0),
+          height: Val::Percent(100.0),
+          display: Display::Flex,
+          flex_direction: FlexDirection::Column,
+          ..default()
+        },
+        background_color: BackgroundColor(RAISIN.with_a(0.8)),
+        ..default()
+      },
+      OnSplashScreen,
+    ))
+    .with_children(|p| {
+      p.spawn(TextBundle::default()).insert(LogText);
+    });
+
   commands
     .spawn((
       NodeBundle {
@@ -79,42 +102,20 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
       OnSplashScreen,
     ))
     .with_children(|parent| {
-      parent
-        .spawn(NodeBundle {
-          style: Style {
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            width: Val::Percent(100.0),
+      parent.spawn(
+        TextBundle::from_section(
+          "Triangle Apocalypse",
+          TextStyle {
+            font_size: 80.0,
+            color: LILAC,
             ..default()
           },
+        )
+        .with_style(Style {
+          margin: UiRect::all(Val::Px(50.0)),
           ..default()
-        })
-        .with_children(|parent2| {
-          parent2.spawn(ImageBundle {
-            style: Style {
-              width: Val::Px(200.0),
-              ..default()
-            },
-            image: UiImage::new(icon),
-            ..default()
-          });
-          parent2
-            .spawn(
-              TextBundle::from_section(
-                "Unnamed Game",
-                TextStyle {
-                  font_size: 80.0,
-                  color: LILAC,
-                  ..default()
-                },
-              )
-              .with_style(Style {
-                margin: UiRect::all(Val::Px(50.0)),
-                ..default()
-              }),
-            )
-            .insert(LogText);
-        });
+        }),
+      );
       parent
         .spawn(
           TextBundle::from_section(
@@ -193,6 +194,7 @@ fn wait_for_preload_assets(
   mut log: EventWriter<SplashLog>,
   mut splash_state: ResMut<SplashState>,
   mut events: EventReader<AssetEvent<LoadedFolder>>,
+  mut cmds: EventWriter<MusicCommand>,
 ) {
   if splash_state.preload_complete {
     return;
@@ -203,6 +205,7 @@ fn wait_for_preload_assets(
         if let Some(handle) = &splash_state.loaded_handles {
           if id == &Into::<AssetId<LoadedFolder>>::into(handle) {
             splash_state.preload_complete = true;
+            cmds.send(MusicCommand::Play(BgMusic::Menu));
             log.send("Preloading assets...ok".into());
           }
         }

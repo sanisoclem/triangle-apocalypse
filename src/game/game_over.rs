@@ -4,6 +4,8 @@ use utils::text::TextAnimation;
 
 use utils::colors::*;
 
+use crate::jukebox::{MusicCommand, BgMusic};
+
 #[derive(Component)]
 pub struct InGameOverScreen;
 
@@ -16,7 +18,8 @@ pub fn wait_to_retry(
   }
 }
 
-pub fn on_game_over(mut cmd: Commands) {
+pub fn on_game_over(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
+  cmds.send(MusicCommand::Play(BgMusic::GameOver));
   cmd
     .spawn((
       NodeBundle {

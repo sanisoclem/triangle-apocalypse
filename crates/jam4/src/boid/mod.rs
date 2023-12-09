@@ -108,7 +108,7 @@ pub fn update_tamed_boids(
   player: Res<PlayerInfo>,
   bconfig: Res<BoidConfig>,
 ) {
-  for (entity) in added.iter() {
+  for entity in added.iter() {
     let Ok(mut boid) = qry.get_mut(entity) else {
       continue;
     };

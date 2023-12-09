@@ -27,7 +27,6 @@ pub struct LevelInfo {
   pub bounds_sdf: Option<SmudShape>,
   pub finish_bounds_sdf: Option<(SmudShape, Vec2)>,
   pub starting_point: Vec2,
-  pub music: Handle<AudioSource>,
   pub next_level: Option<LevelId>,
   pub spawn_points: Vec<Vec2>,
   pub boids_per_spawn_point: u8,

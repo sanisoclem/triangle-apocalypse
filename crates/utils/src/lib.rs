@@ -11,6 +11,7 @@ pub mod game_time;
 pub mod fps;
 pub mod text;
 pub mod colors;
+pub mod music;
 
 pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
   for entity in &to_despawn {

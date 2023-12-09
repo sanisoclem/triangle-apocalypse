@@ -5,13 +5,16 @@ use jam4::{
   Player, PlayerInfo,
 };
 
+use crate::jukebox::{BgMusic, MusicCommand};
+
 #[derive(Component)]
 pub struct InPlayingScreen;
 
 #[derive(Component)]
 pub struct ScoreBoard;
 
-pub fn setup_player_ui(mut cmd: Commands) {
+pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
+  cmds.send(MusicCommand::Play(BgMusic::MainTheme));
   cmd
     .spawn((
       NodeBundle {
@@ -87,6 +90,7 @@ pub fn calc_player_direction(
 }
 
 pub fn toggle_player_mode(
+  mut cmd: Commands,
   mut qry: Query<(&mut ParticleEffect, &mut Boid, &mut Handle<ColorMaterial>), With<Player>>,
   keyboard_input: Res<Input<KeyCode>>,
   mut player: ResMut<PlayerInfo>,
@@ -102,11 +106,19 @@ pub fn toggle_player_mode(
   player.in_boost_mode = !player.in_boost_mode;
 
   if player.in_boost_mode {
+    cmd.spawn(AudioBundle {
+      source: player.audio_boost.clone(),
+      settings: PlaybackSettings::DESPAWN,
+    });
     fx.handle = player.boost_particles.clone();
     *mat = player.boost_color.clone();
     boid.speed = bconfig.max_speed;
     boid.turning_speed = bconfig.min_turn_speed;
   } else {
+    cmd.spawn(AudioBundle {
+      source: player.audio_slow.clone(),
+      settings: PlaybackSettings::DESPAWN,
+    });
     fx.handle = player.normal_particles.clone();
     *mat = player.normal_color.clone();
     boid.speed = bconfig.min_speed;

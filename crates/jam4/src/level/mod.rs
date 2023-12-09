@@ -123,15 +123,6 @@ pub fn on_load_level_requested(
     }
   }
 
-  // TODO: start playing when game starts
-  cmd
-    .spawn(AudioBundle {
-      source: to_load.music.clone(),
-      settings: PlaybackSettings::LOOP,
-      ..default()
-    })
-    .insert(Simulation);
-
   lvl_mgr.current_level = Some(id_to_load);
   lvl_mgr.level_complete = false;
   lvl_mgr.load_next = None;
