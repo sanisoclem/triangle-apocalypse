@@ -112,15 +112,7 @@ impl Jukebox {
     });
     let game_over_theme = asset_server.add(ProcessedAudio {
       sources: vec![game_over.clone()], // wow
-      process: |sources| {
-        Box::new(
-          sources
-            .first()
-            .unwrap()
-            .decoder()
-            .fade_in(Duration::from_secs(1)),
-        )
-      },
+      process: |sources| Box::new(sources.first().unwrap().decoder()),
     });
 
     self.init_result = Some(InitResult {

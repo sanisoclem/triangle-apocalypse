@@ -42,6 +42,7 @@ pub fn build_level2(asset_server: &AssetServer) -> LevelInfo {
     spawn_points: vec![Vec2::new(0., 300.), Vec2::new(0., 600.)],
     rescue_goal: 10.into(),
     time_goal: Duration::from_secs(60).into(),
+    wander: false,
   };
   lvl
 }

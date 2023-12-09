@@ -80,7 +80,7 @@ pub fn on_load_level_requested(
   mut cmd: Commands,
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
-  bconfig: Res<BoidConfig>,
+  mut bconfig: ResMut<BoidConfig>,
   mut player: ResMut<PlayerInfo>,
   mut bounds: ResMut<MoveableBounds>,
   mut meshes: ResMut<Assets<Mesh>>,
@@ -100,6 +100,8 @@ pub fn on_load_level_requested(
   // reset
   player.in_boost_mode = false;
   lvl_mgr.watch.reset();
+
+  bconfig.wander = to_load.wander;
 
   // spawn level entities
   if let Some(shape) = &to_load.bounds_sdf {

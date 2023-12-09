@@ -26,6 +26,7 @@ pub struct BoidConfig {
   pub color_wild: Handle<ColorMaterial>,
   pub color_tamed: Handle<ColorMaterial>,
   pub color_tamed_boosted: Handle<ColorMaterial>,
+  pub wander: bool,
 }
 
 impl FromWorld for BoidConfig {
@@ -114,6 +115,7 @@ impl FromWorld for BoidConfig {
       color_wild,
       color_tamed,
       color_tamed_boosted,
+      wander: true,
     }
   }
 }

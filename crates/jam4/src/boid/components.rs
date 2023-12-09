@@ -65,6 +65,7 @@ impl Boid {
     bconfig: &BoidConfig,
     position2d: Vec2,
     bounds: &MoveableBounds,
+    is_tamed: bool,
     _gizmos: &mut Gizmos,
   ) -> (Vec2, f32) {
     // don't calculate forces for player boid
@@ -132,7 +133,12 @@ impl Boid {
     (
       ((bounds_force.normalize_or_zero() * bconfig.boundary)
         + (separation_force.normalize_or_zero() * bconfig.repulsion)
-        + (alignment_force.normalize_or_zero() * bconfig.alignment)
+        + (alignment_force.normalize_or_zero()
+          * if is_tamed || bconfig.wander {
+            bconfig.alignment
+          } else {
+            0.0
+          })
         + (cohesion_force.normalize_or_zero() * bconfig.cohesion))
         .normalize_or_zero(),
       speed_change,

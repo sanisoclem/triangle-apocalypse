@@ -32,6 +32,7 @@ pub struct LevelInfo {
   pub boids_per_spawn_point: u8,
   pub rescue_goal: Option<u16>,
   pub time_goal: Option<Duration>,
+  pub wander: bool,
 }
 
 impl LevelRegistry {
