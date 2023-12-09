@@ -9,14 +9,18 @@ use self::{
   controls::{
     calc_player_direction, setup_player_ui, toggle_player_mode, update_player_ui, InPlayingScreen,
   },
-  game_over::{on_game_over, wait_to_retry, InGameOverScreen},
+  game_over_boid::on_game_over_boid,
+  game_over_bounds::{on_game_over_bounds, wait_to_retry, InGameOverScreen},
+  game_over_time::on_game_over_time,
   gg::on_game_complete,
   grid::{build_grid, GridMaterial},
   level_complete::{setup_level_complete, wait_to_next_level, InLevelCompleteScreen},
 };
 
 mod controls;
-mod game_over;
+mod game_over_boid;
+mod game_over_bounds;
+mod game_over_time;
 mod gg;
 mod level_complete;
 
@@ -41,9 +45,28 @@ impl GameExtensions for App {
         OnExit(SimulationState::GameComplete),
         despawn_screen::<InLevelCompleteScreen>,
       )
-      .add_systems(OnEnter(SimulationState::GameOver), on_game_over)
       .add_systems(
-        OnExit(SimulationState::GameOver),
+        OnEnter(SimulationState::GameOver(jam4::GameOverReason::OutOfBounds)),
+        on_game_over_bounds,
+      )
+      .add_systems(
+        OnEnter(SimulationState::GameOver(jam4::GameOverReason::OutOfBoids)),
+        on_game_over_boid,
+      )
+      .add_systems(
+        OnEnter(SimulationState::GameOver(jam4::GameOverReason::OutOfTime)),
+        on_game_over_time,
+      )
+      .add_systems(
+        OnExit(SimulationState::GameOver(jam4::GameOverReason::OutOfBounds)),
+        despawn_screen::<InGameOverScreen>,
+      )
+      .add_systems(
+        OnExit(SimulationState::GameOver(jam4::GameOverReason::OutOfBoids)),
+        despawn_screen::<InGameOverScreen>,
+      )
+      .add_systems(
+        OnExit(SimulationState::GameOver(jam4::GameOverReason::OutOfTime)),
         despawn_screen::<InGameOverScreen>,
       )
       .add_systems(
@@ -72,7 +95,15 @@ impl GameExtensions for App {
             update_player_ui,
           )
             .run_if(in_state(SimulationState::Simulating)),
-          wait_to_retry.run_if(in_state(SimulationState::GameOver)),
+          wait_to_retry.run_if(in_state(SimulationState::GameOver(
+            jam4::GameOverReason::OutOfBoids,
+          ))),
+          wait_to_retry.run_if(in_state(SimulationState::GameOver(
+            jam4::GameOverReason::OutOfTime,
+          ))),
+          wait_to_retry.run_if(in_state(SimulationState::GameOver(
+            jam4::GameOverReason::OutOfBounds,
+          ))),
           wait_to_next_level.run_if(in_state(SimulationState::LevelComplete)),
         ),
       );

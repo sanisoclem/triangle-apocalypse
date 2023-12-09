@@ -12,6 +12,26 @@ mod registry;
 
 pub use registry::*;
 
+pub fn time_level(
+  mut next_sim_state: ResMut<NextState<SimulationState>>,
+  mut lvl_mgr: ResMut<LevelManager>,
+  lvl_reg: Res<LevelRegistry>,
+  time: Res<Time>,
+) {
+  let Some(level_id) = lvl_mgr.current_level else {
+    return;
+  };
+  let lvl = lvl_reg.get_level(&level_id);
+  lvl_mgr.watch.tick(time.delta());
+
+  if let Some(time_goal) = lvl.time_goal {
+    if lvl_mgr.watch.elapsed() > time_goal {
+      next_sim_state.set(SimulationState::GameOver(crate::GameOverReason::OutOfTime));
+      return;
+    }
+  }
+}
+
 pub fn check_if_level_complete(
   qry: Query<&Transform, With<Player>>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
@@ -28,8 +48,17 @@ pub fn check_if_level_complete(
 
   if lvl.finish_bounds.distance_to_edge(t.translation.xy()) < 0.0 {
     // hit the finish line
+
+    let score = qry_boid.iter().count();
+    if let Some(rescue_goal) = lvl.rescue_goal {
+      if score < rescue_goal as usize {
+        next_sim_state.set(SimulationState::GameOver(crate::GameOverReason::OutOfBoids));
+        return;
+      }
+    }
+
     lvl_mgr.level_complete = true;
-    player.score += qry_boid.iter().count() as u32;
+    player.score += score as u32;
     next_sim_state.set(SimulationState::LevelComplete);
   }
 }
@@ -42,7 +71,9 @@ pub fn check_if_game_over(
     return;
   }
 
-  next_sim_state.set(SimulationState::GameOver);
+  next_sim_state.set(SimulationState::GameOver(
+    crate::GameOverReason::OutOfBounds,
+  ));
 }
 
 pub fn on_load_level_requested(
@@ -50,7 +81,7 @@ pub fn on_load_level_requested(
   mut lvl_mgr: ResMut<LevelManager>,
   lvl_reg: Res<LevelRegistry>,
   bconfig: Res<BoidConfig>,
-  player: ResMut<PlayerInfo>,
+  mut player: ResMut<PlayerInfo>,
   mut bounds: ResMut<MoveableBounds>,
   mut meshes: ResMut<Assets<Mesh>>,
   to_despawn: Query<Entity, With<Simulation>>,
@@ -65,6 +96,10 @@ pub fn on_load_level_requested(
   for entity in &to_despawn {
     cmd.entity(entity).despawn_recursive();
   }
+
+  // reset
+  player.in_boost_mode = false;
+  lvl_mgr.watch.reset();
 
   // spawn level entities
   if let Some(shape) = &to_load.bounds_sdf {
@@ -138,19 +173,15 @@ pub fn find_level_to_load(
 ) {
   if let Some(cur_lvl) = lvl_mgr.current_level {
     if !lvl_mgr.level_complete {
-      player.in_boost_mode = false;
       lvl_mgr.load_level(&cur_lvl);
     } else {
       // level complete
       let cur = lvl_reg.get_level(&cur_lvl);
-      player.in_boost_mode = false;
       if let Some(next) = cur.next_level {
         // load next level
-        info!("loading next level");
         lvl_mgr.load_level(&next);
       } else {
         // no more levels, GG
-        info!("GG");
         next_sim_state.set(SimulationState::GameComplete)
       }
     }

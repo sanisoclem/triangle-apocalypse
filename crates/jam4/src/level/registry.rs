@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
-use bevy::prelude::*;
+use bevy::{prelude::*, time::Stopwatch};
 use bevy_smud::SmudShape;
 
 use crate::moveable::MoveableBounds;
@@ -30,6 +30,8 @@ pub struct LevelInfo {
   pub next_level: Option<LevelId>,
   pub spawn_points: Vec<Vec2>,
   pub boids_per_spawn_point: u8,
+  pub rescue_goal: Option<u16>,
+  pub time_goal: Option<Duration>,
 }
 
 impl LevelRegistry {
@@ -43,6 +45,7 @@ pub struct LevelManager {
   pub current_level: Option<LevelId>,
   pub level_complete: bool,
   pub load_next: Option<LevelId>,
+  pub watch: Stopwatch
 }
 
 impl LevelManager {

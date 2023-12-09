@@ -1,13 +1,29 @@
 use bevy::prelude::*;
-use jam4::PlayerInfo;
+use jam4::{
+  level::{LevelManager, LevelRegistry},
+  GameControlCommand,
+};
 use utils::text::TextAnimation;
 
 use utils::colors::*;
 
-#[derive(Component)]
-pub struct InGGScreen;
+use crate::jukebox::{BgMusic, MusicCommand};
 
-pub fn on_game_complete(mut cmd: Commands, player: Res<PlayerInfo>) {
+use super::game_over_bounds::InGameOverScreen;
+
+pub fn on_game_over_boid(
+  mut cmd: Commands,
+  mut cmds: EventWriter<MusicCommand>,
+  lvl_mgr: ResMut<LevelManager>,
+  lvl_reg: Res<LevelRegistry>,
+) {
+  let Some(level_id) = lvl_mgr.current_level else {
+    return;
+  };
+  let lvl = lvl_reg.get_level(&level_id);
+  let target = lvl.rescue_goal.expect("should have a rescue goal");
+
+  cmds.send(MusicCommand::Play(BgMusic::GameOver));
   cmd
     .spawn((
       NodeBundle {
@@ -23,7 +39,7 @@ pub fn on_game_complete(mut cmd: Commands, player: Res<PlayerInfo>) {
         background_color: BackgroundColor(RAISIN.with_a(0.8)),
         ..default()
       },
-      InGGScreen,
+      InGameOverScreen,
     ))
     .with_children(|parent| {
       parent
@@ -44,8 +60,8 @@ pub fn on_game_complete(mut cmd: Commands, player: Res<PlayerInfo>) {
         )
         .insert(TextAnimation {
           text: format!(
-            "GG\nYou rescued {} triangles\nThank you for playing!",
-            player.score
+            "Game Over\nyou need to rescue {} triangles to clear the level\npress space to retry",
+            target
           ),
           animation_speed: 1.0,
         });

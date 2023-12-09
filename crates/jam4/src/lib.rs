@@ -16,7 +16,7 @@ use boid::{
 pub use components::*;
 use level::{
   check_if_game_over, check_if_level_complete, find_level_to_load, on_load_level_requested,
-  LevelManager, LevelRegistry,
+  LevelManager, LevelRegistry, time_level,
 };
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
@@ -61,6 +61,7 @@ impl Jam4Extensions for App {
           update_boid_velocity,
           move_moveables,
           (
+            time_level,
             check_if_game_over,
             despawn_collided_boids,
             check_if_level_complete,

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_hanabi::ParticleEffect;
 use jam4::{
   boid::{Boid, BoidConfig, TamedBoid},
+  level::{LevelManager, LevelRegistry},
   Player, PlayerInfo,
 };
 
@@ -12,6 +13,9 @@ pub struct InPlayingScreen;
 
 #[derive(Component)]
 pub struct ScoreBoard;
+
+#[derive(Component)]
+pub struct TimeRemaning;
 
 pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
   cmds.send(MusicCommand::Play(BgMusic::MainTheme));
@@ -24,6 +28,8 @@ pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
           bottom: Val::Px(0.0),
           position_type: PositionType::Absolute,
           padding: UiRect::all(Val::Px(10.0)),
+          display: Display::Flex,
+          justify_content: JustifyContent::SpaceBetween,
           ..default()
         },
         ..default()
@@ -33,10 +39,23 @@ pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
     .with_children(|parent| {
       parent
         .spawn(TextBundle {
-          style: Style {
-            width: Val::Percent(100.0),
+          text: Text {
+            sections: vec![TextSection {
+              value: "".to_owned(),
+              style: TextStyle {
+                font_size: 40.,
+                color: Color::RED,
+                ..default()
+              },
+            }],
+            alignment: TextAlignment::Right,
             ..default()
           },
+          ..default()
+        })
+        .insert(TimeRemaning);
+      parent
+        .spawn(TextBundle {
           text: Text {
             sections: vec![TextSection {
               value: "".to_owned(),
@@ -46,7 +65,7 @@ pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
                 ..default()
               },
             }],
-            alignment: TextAlignment::Right,
+            alignment: TextAlignment::Left,
             ..default()
           },
           ..default()
@@ -57,17 +76,37 @@ pub fn setup_player_ui(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
 
 pub fn update_player_ui(
   qry_boid: Query<Entity, (With<Boid>, With<TamedBoid>, Without<Player>)>,
-  qry_boid2: Query<Entity, (With<Boid>, Without<TamedBoid>, Without<Player>)>,
-  mut qry_ui: Query<&mut Text, With<ScoreBoard>>,
-  player: Res<PlayerInfo>,
+  // qry_boid2: Query<Entity, (With<Boid>, Without<TamedBoid>, Without<Player>)>,
+  mut qry_score: Query<&mut Text, (With<ScoreBoard>, Without<TimeRemaning>)>,
+  mut qry_time: Query<&mut Text, (With<TimeRemaning>, Without<ScoreBoard>)>,
+  lvl_mgr: ResMut<LevelManager>,
+  lvl_reg: Res<LevelRegistry>,
 ) {
-  let Ok(mut txt) = qry_ui.get_single_mut() else {
+  let Ok(mut txt_score) = qry_score.get_single_mut() else {
     return;
   };
+  let Ok(mut txt_time) = qry_time.get_single_mut() else {
+    return;
+  };
+  let Some(level_id) = lvl_mgr.current_level else {
+    return;
+  };
+  let lvl = lvl_reg.get_level(&level_id);
+
   let tamed = qry_boid.iter().count();
-  let wild = qry_boid2.iter().count();
-  txt.sections.first_mut().unwrap().value =
-    format!("{} + {}/{}", player.score, tamed, tamed + wild);
+  if let Some(rescue_target) = lvl.rescue_goal {
+    txt_score.sections.first_mut().unwrap().value = format!("{}/{}", tamed, rescue_target);
+  } else {
+    txt_score.sections.first_mut().unwrap().value = format!("{} ", tamed);
+  }
+  if let Some(time_target) = lvl.time_goal {
+    let s = time_target.as_secs_f32() - lvl_mgr.watch.elapsed_secs();
+    let mm = (s / 60.).floor() as u8;
+    let ss = (s.floor() as u16) % 60;
+    txt_time.sections.first_mut().unwrap().value = format!("{:02}:{:02}", mm, ss);
+  } else {
+    txt_time.sections.first_mut().unwrap().value = "".to_owned();
+  }
 }
 
 pub fn calc_player_direction(

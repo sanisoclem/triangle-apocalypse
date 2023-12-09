@@ -68,7 +68,7 @@ pub fn setup_level_complete(
         )
         .insert(TextAnimation {
           text: format!(
-            "{} complete\nYou herded {} shapes so far\nPress space to continue",
+            "{} complete\nYou have rescued {} shapes so far\nPress space to continue",
             lvl.name, player.score
           ),
           animation_speed: 1.0,

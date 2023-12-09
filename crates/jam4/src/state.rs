@@ -24,7 +24,14 @@ pub enum SimulationState {
   GameComplete,
   /// Player failed objectives
   /// can only transition to Loading (to reload the level)
-  GameOver,
+  GameOver(GameOverReason),
+}
+
+#[derive(Copy, Debug, Clone, Eq,PartialEq, Hash)]
+pub enum GameOverReason {
+  OutOfBounds,
+  OutOfTime,
+  OutOfBoids
 }
 
 #[derive(Event, Debug)]
@@ -55,7 +62,7 @@ pub fn process_game_control_commands(
         // level has been completed, signal that we want to unload current level and load next level
         next_sim_state.set(SimulationState::ChoosingLevel)
       }
-      (SimulationState::GameOver, GameControlCommand::Retry) => {
+      (SimulationState::GameOver(_), GameControlCommand::Retry) => {
         next_sim_state.set(SimulationState::ChoosingLevel)
       }
       _ => {

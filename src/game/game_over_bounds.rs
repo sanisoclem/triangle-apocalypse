@@ -18,7 +18,7 @@ pub fn wait_to_retry(
   }
 }
 
-pub fn on_game_over(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>) {
+pub fn on_game_over_bounds(mut cmd: Commands, mut cmds: EventWriter<MusicCommand>,) {
   cmds.send(MusicCommand::Play(BgMusic::GameOver));
   cmd
     .spawn((
