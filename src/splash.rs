@@ -166,7 +166,7 @@ fn on_game_init(
   log.send("Initializing game modules...ok".into());
 
   cmd.entity(qry.single()).insert(TextAnimation {
-    text: "Press space to continue".to_owned(),
+    text: "Press space to play".to_owned(),
     animation_speed: 1.0,
   });
 }

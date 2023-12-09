@@ -105,6 +105,7 @@ impl Jukebox {
             .first()
             .unwrap()
             .decoder()
+            .repeat_infinite()
             .delay(Duration::from_secs(1)),
         )
       },
