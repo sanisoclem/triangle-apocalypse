@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Material2dPlugin};
 use bevy_smud::SmudPlugin;
 
 pub mod boid;
@@ -8,12 +8,16 @@ mod mods;
 pub mod moveable;
 mod player;
 mod state;
+mod grid;
+mod finish_line;
 
 use boid::{
   calc_tamed_boids, calculate_boid_direction, despawn_collided_boids, draw_boid_gizmos,
   update_boid_velocity, update_tamed_boids, BoidConfig,
 };
 pub use components::*;
+use finish_line::FinishLineMaterial;
+use grid::GridMaterial;
 use level::{
   check_if_game_over, check_if_level_complete, find_level_to_load, on_load_level_requested,
   LevelManager, LevelRegistry, time_level,
@@ -31,6 +35,8 @@ impl Jam4Extensions for App {
   fn add_jam_game(&mut self) -> &mut Self {
     self
       .add_plugins(SmudPlugin)
+      .add_plugins(Material2dPlugin::<GridMaterial>::default())
+      .add_plugins(Material2dPlugin::<FinishLineMaterial>::default())
       .init_resource::<PlayerInfo>()
       .init_resource::<ModManager>()
       .init_resource::<MoveableBounds>()

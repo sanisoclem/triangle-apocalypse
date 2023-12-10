@@ -60,8 +60,8 @@ impl From<&str> for SplashLog {
   }
 }
 
-fn splash_setup(mut commands: Commands, _asset_server: Res<AssetServer>) {
-  // let icon = asset_server.load("splash.png");
+fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+  let icon = asset_server.load("Triangle Apocalypse.png");
   commands.spawn((Camera2dBundle::default(), OnSplashScreen));
   commands
     .spawn((
@@ -75,7 +75,7 @@ fn splash_setup(mut commands: Commands, _asset_server: Res<AssetServer>) {
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(RAISIN.with_a(0.8)),
+        background_color: BackgroundColor(Color::BLACK),
         ..default()
       },
       OnSplashScreen,
@@ -96,26 +96,31 @@ fn splash_setup(mut commands: Commands, _asset_server: Res<AssetServer>) {
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(RAISIN.with_a(0.8)),
         ..default()
       },
       OnSplashScreen,
     ))
     .with_children(|parent| {
-      parent.spawn(
-        TextBundle::from_section(
-          "Triangle Apocalypse",
-          TextStyle {
-            font_size: 80.0,
-            color: LILAC,
+      parent
+        .spawn(NodeBundle {
+          style: Style {
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            width: Val::Percent(100.0),
             ..default()
           },
-        )
-        .with_style(Style {
-          margin: UiRect::all(Val::Px(50.0)),
           ..default()
-        }),
-      );
+        })
+        .with_children(|parent2| {
+          parent2.spawn(ImageBundle {
+            style: Style {
+              width: Val::Px(800.0),
+              ..default()
+            },
+            image: UiImage::new(icon),
+            ..default()
+          });
+        });
       parent
         .spawn(
           TextBundle::from_section(
@@ -183,6 +188,10 @@ fn show_logs(mut log: EventReader<SplashLog>, mut qry: Query<&mut Text, With<Log
       } else {
         target.sections.push(TextSection {
           value: format!("\n{}", l.0),
+          style: TextStyle {
+            color: MISTY,
+            ..default()
+          },
           ..default()
         })
       }

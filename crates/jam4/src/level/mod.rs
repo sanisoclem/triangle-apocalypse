@@ -1,11 +1,12 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_hanabi::prelude::*;
-use bevy_smud::ShapeBundle;
+use bevy_smud::{Frame, ShapeBundle};
 
 use crate::{
   boid::{Boid, BoidConfig, TamedBoid},
+  grid::{build_grid, GridMaterial},
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
-  spawn_player, Player, PlayerInfo, Simulation, SimulationState,
+  spawn_player, Player, PlayerInfo, Simulation, SimulationState, finish_line::{build_finish_line, FinishLineMaterial},
 };
 
 mod registry;
@@ -46,7 +47,7 @@ pub fn check_if_level_complete(
   let level_id = lvl_mgr.current_level.unwrap();
   let lvl = lvl_reg.get_level(&level_id);
 
-  if lvl.finish_bounds.distance_to_edge(t.translation.xy()) < 0.0 {
+  if lvl.finish_bounds_box.distance_to_edge(t.translation.xy()) < 0.0 {
     // hit the finish line
 
     let score = qry_boid.iter().count();
@@ -76,6 +77,7 @@ pub fn check_if_game_over(
   ));
 }
 
+
 pub fn on_load_level_requested(
   mut cmd: Commands,
   mut lvl_mgr: ResMut<LevelManager>,
@@ -84,6 +86,8 @@ pub fn on_load_level_requested(
   mut player: ResMut<PlayerInfo>,
   mut bounds: ResMut<MoveableBounds>,
   mut meshes: ResMut<Assets<Mesh>>,
+  mut grid_mats: ResMut<Assets<GridMaterial>>,
+  mut fline_mats: ResMut<Assets<FinishLineMaterial>>,
   to_despawn: Query<Entity, With<Simulation>>,
   mut next_sim_state: ResMut<NextState<SimulationState>>,
 ) {
@@ -112,16 +116,19 @@ pub fn on_load_level_requested(
         ..default()
       })
       .insert(Simulation);
+    let Frame::Quad(frame_size) = shape.frame;
+    build_grid(
+      &mut cmd,
+      &mut meshes,
+      &mut grid_mats,
+      Vec2::splat(frame_size),
+    );
   }
-  if let Some((shape, tx)) = &to_load.finish_bounds_sdf {
-    cmd
-      .spawn(ShapeBundle {
-        shape: shape.clone(),
-        transform: Transform::from_translation(tx.extend(-10.0)),
-        ..default()
-      })
-      .insert(Simulation);
-  }
+  build_finish_line(
+    &mut cmd,
+    &mut meshes,
+    &mut fline_mats,
+    to_load.finish_bounds);
 
   // update bounds
   *bounds = to_load.bounds.clone();

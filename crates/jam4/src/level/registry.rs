@@ -23,9 +23,9 @@ pub struct LevelRegistry {
 pub struct LevelInfo {
   pub name: String,
   pub bounds: MoveableBounds,
-  pub finish_bounds: MoveableBounds,
+  pub finish_bounds_box: MoveableBounds,
+  pub finish_bounds: Vec4,
   pub bounds_sdf: Option<SmudShape>,
-  pub finish_bounds_sdf: Option<(SmudShape, Vec2)>,
   pub starting_point: Vec2,
   pub next_level: Option<LevelId>,
   pub spawn_points: Vec<Vec2>,

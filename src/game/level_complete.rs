@@ -44,7 +44,7 @@ pub fn setup_level_complete(
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(RAISIN.with_a(0.8)),
+        background_color: BackgroundColor(Color::BLACK.with_a(0.7)),
         ..default()
       },
       InLevelCompleteScreen,

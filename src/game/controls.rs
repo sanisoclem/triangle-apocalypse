@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{input::keyboard::KeyboardInput, prelude::*};
 use bevy_hanabi::ParticleEffect;
 use jam4::{
   boid::{Boid, BoidConfig, TamedBoid},

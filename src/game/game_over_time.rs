@@ -33,7 +33,7 @@ pub fn on_game_over_time(
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(RAISIN.with_a(0.8)),
+        background_color: BackgroundColor(Color::RED.with_a(0.01)),
         ..default()
       },
       InGameOverScreen,

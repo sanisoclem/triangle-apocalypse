@@ -1,16 +1,20 @@
-#define_import_path smud::terrain_2
+#define_import_path smud::terrain
 
 #import smud
 
 fn sdf(p_in: vec2<f32>) -> f32 {
-  let outer = smud::sd_box(p_in, vec2<f32>(2000., 10000.));
-  let inner = smud::sd_box(p_in, vec2<f32>(1000., 9000.));
-  let m1 = smud::sd_circle(p_in - vec2<f32>(300.,200.), 200.);
-  let m2 = smud::sd_circle(p_in - vec2<f32>(-200.,300.), 150.);
-  let m3 = smud::sd_circle(p_in - vec2<f32>(300.,-300.), 125.);
-  let m4 = smud::sd_circle(p_in - vec2<f32>(100.,1500.), 50.);
+  let h = 10000.;
+  let w = 2000.;
+  let outer = smud::sd_box(p_in, vec2<f32>(w + 3000., h + 3000.));
+  let inner = smud::sd_box(p_in, vec2<f32>(w, h));
+  let t1 = smud::sd_triangle(p_in, vec2<f32>(w,0.), vec2<f32>(w,-h), vec2<f32>(500.,-h));
+  let t2 = smud::sd_triangle(p_in, vec2<f32>(-w,0.), vec2<f32>(-w,-h), vec2<f32>(-500.,-h));
+  let t3 = smud::sd_triangle(p_in, vec2<f32>(w,0.), vec2<f32>(w,h), vec2<f32>(500.,h));
+  let t4 = smud::sd_triangle(p_in, vec2<f32>(-w,0.), vec2<f32>(-w,h), vec2<f32>(-500.,h));
 
-  let inner2 = max(max(max(max(inner, -m1), -m2), -m3), -m4);
+  let down = smud::op_union(t1,t2);
+  let up = smud::op_union(t3,t4);
+  let ts = smud::op_union(up,down);
 
-  return max(outer, -inner2);
+  return smud::op_union(smud::op_subtract(inner, outer), ts);
 }

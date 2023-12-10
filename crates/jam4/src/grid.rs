@@ -9,51 +9,40 @@ use bevy::{
   },
   sprite::{Material2d, Material2dKey, MaterialMesh2dBundle, Mesh2dHandle},
 };
-use bevy_smud::prelude::Frame;
-use jam4::level::{LevelManager, LevelRegistry};
+
+use crate::Simulation;
 
 pub fn build_grid(
-  mut commands: Commands,
-  mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<GridMaterial>>,
-  lvl: Res<LevelManager>,
-  reg: Res<LevelRegistry>,
+  commands: &mut Commands,
+  meshes: &mut Assets<Mesh>,
+  materials: &mut Assets<GridMaterial>,
+  frame_size: Vec2,
 ) {
-  let cur_level_id = lvl.current_level.expect("should have an active level");
-  let cur_level = reg
-    .levels
-    .get(&cur_level_id)
-    .expect("active level should be in registry");
-
-  let Frame::Quad(sz) = cur_level
-    .bounds_sdf
-    .clone()
-    .expect("should have bounds for a grid")
-    .frame;
-  // sz = 400.;
   let mut grid = Mesh::new(PrimitiveTopology::TriangleList);
 
   let v_pos = vec![
-    [-sz, -sz, 0.0],
-    [-sz, sz, 0.0],
-    [sz, sz, 0.0],
-    [sz, -sz, 0.0],
+    [-frame_size.x, -frame_size.y, 0.0],
+    [-frame_size.x, frame_size.y, 0.0],
+    [frame_size.x, frame_size.y, 0.0],
+    [frame_size.x, -frame_size.y, 0.0],
   ];
   grid.insert_attribute(Mesh::ATTRIBUTE_POSITION, v_pos);
 
-  let vertex_colors: Vec<[f32; 2]> = vec![[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]];
+  let uvs: Vec<[f32; 2]> = vec![[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]];
 
-  grid.insert_attribute(Mesh::ATTRIBUTE_UV_0, vertex_colors);
+  grid.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
   let indices = vec![0, 2, 1, 2, 0, 3];
   grid.set_indices(Some(Indices::U32(indices)));
 
-  commands.spawn(MaterialMesh2dBundle {
-    mesh: Mesh2dHandle(meshes.add(grid)),
-    material: materials.add(GridMaterial {}),
-    transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
-    ..default()
-  });
+  commands
+    .spawn(MaterialMesh2dBundle {
+      mesh: Mesh2dHandle(meshes.add(grid)),
+      material: materials.add(GridMaterial {}),
+      transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
+      ..default()
+    })
+    .insert(Simulation);
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]

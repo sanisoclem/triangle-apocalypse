@@ -7,13 +7,13 @@ use utils::despawn_screen;
 
 use self::{
   controls::{
-    calc_player_direction, setup_player_ui, toggle_player_mode, update_player_ui, InPlayingScreen,
+    calc_player_direction, setup_player_ui, toggle_player_mode,
+    update_player_ui, InPlayingScreen,
   },
   game_over_boid::on_game_over_boid,
   game_over_bounds::{on_game_over_bounds, wait_to_retry, InGameOverScreen},
   game_over_time::on_game_over_time,
   gg::on_game_complete,
-  grid::{build_grid, GridMaterial},
   level_complete::{setup_level_complete, wait_to_next_level, InLevelCompleteScreen},
 };
 
@@ -27,7 +27,6 @@ mod level_complete;
 mod camera;
 #[cfg(feature = "debug")]
 mod debug;
-mod grid;
 
 #[derive(Resource)]
 struct GameNextState<T>(T);
@@ -38,7 +37,6 @@ pub trait GameExtensions {
 impl GameExtensions for App {
   fn add_game<T: States + Copy>(&mut self, game_state: T) -> &mut Self {
     self
-      .add_plugins(Material2dPlugin::<GridMaterial>::default())
       .add_systems(OnEnter(game_state), setup_camera)
       .add_systems(OnEnter(SimulationState::GameComplete), on_game_complete)
       .add_systems(
@@ -77,10 +75,7 @@ impl GameExtensions for App {
         OnExit(SimulationState::LevelComplete),
         despawn_screen::<InLevelCompleteScreen>,
       )
-      .add_systems(
-        OnEnter(SimulationState::Simulating),
-        (setup_player_ui, build_grid),
-      )
+      .add_systems(OnEnter(SimulationState::Simulating), setup_player_ui)
       .add_systems(
         OnExit(SimulationState::Simulating),
         despawn_screen::<InPlayingScreen>,
