@@ -10,30 +10,26 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
   let h = w * 2.0 + 1000.;
   let wp = 500.;
   let border = 3000.;
-  let hw = (h - 2.0 * w)/2. + 200. ;
+  let hw = (h - 2.0 * w) / 2. + 200.;
 
   let fbounds = Vec4::new(0.0, h + 4_000., 5_000., 5_000.);
 
   let outer = sdfu::Box::new(Vec2::new(w + border, h + border));
-  let inner1 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, h -hw));
-  let inner2 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, -h +hw));
+  let inner1 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, h - hw));
+  let inner2 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, -h + hw));
   let inner = inner1.union(inner2);
   let mid_box = sdfu::Box::new(Vec2::new(wp, wp));
 
   let s1p = Vec2::new(0.0, -w);
-  let s1a = sdfu::Circle::new( w).translate(s1p);
-  let s1b = sdfu::Circle::new( w - wp).translate(s1p);
-  let s1c = sdfu::Circle::new( w + wp).translate(s1p);
-  // let s1 = smud::op_union(smud::op_subtract(s1a,s1c), s1b);
+  let s1a = sdfu::Circle::new(w).translate(s1p);
+  let s1b = sdfu::Circle::new(w - wp).translate(s1p);
 
   let s2p = Vec2::new(0.0, w);
-  let s2a = sdfu::Circle::new( w).translate(s2p);
-  let s2b = sdfu::Circle::new( w - wp).translate(s2p);
-  let s2c = sdfu::Circle::new( w + wp).translate(s2p);
+  let s2a = sdfu::Circle::new(w).translate(s2p);
+  let s2b = sdfu::Circle::new(w - wp).translate(s2p);
 
   let sa = s1a.union(s2a);
   let sb = s1b.union(s2b);
-  let sc = s1c.union(s2c);
 
   let shape = outer.subtract(sa.subtract(sb).union(mid_box).union(inner));
 

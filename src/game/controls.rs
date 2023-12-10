@@ -1,4 +1,4 @@
-use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use bevy::prelude::*;
 use bevy_hanabi::ParticleEffect;
 use jam4::{
   boid::{Boid, BoidConfig, TamedBoid},
@@ -134,7 +134,7 @@ pub fn toggle_player_mode(
   keyboard_input: Res<Input<KeyCode>>,
   mut player: ResMut<PlayerInfo>,
   bconfig: Res<BoidConfig>,
-  mut qry_music : Query<(&mut AudioSink), With<BgMusic>>
+  mut qry_music: Query<&mut AudioSink, With<BgMusic>>,
 ) {
   let Ok((mut fx, mut boid, mut mat)) = qry.get_single_mut() else {
     return;

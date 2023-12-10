@@ -9,7 +9,6 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
   let w = 2000.;
   let h = 10000.;
   let fbounds = Vec4::new(0.0, 10_000., 5_000., 5_000.);
-  let a = 3.0 * w / 2.0;
   let angle = f32::atan(3. * (w / 2.) / h);
   let h2 = w / (2.0 * angle.tan());
 

@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::Material2dPlugin};
+use bevy::prelude::*;
 
 use camera::*;
 
@@ -7,8 +7,7 @@ use utils::despawn_screen;
 
 use self::{
   controls::{
-    calc_player_direction, setup_player_ui, toggle_player_mode,
-    update_player_ui, InPlayingScreen,
+    calc_player_direction, setup_player_ui, toggle_player_mode, update_player_ui, InPlayingScreen,
   },
   game_over_boid::on_game_over_boid,
   game_over_bounds::{on_game_over_bounds, wait_to_retry, InGameOverScreen},
