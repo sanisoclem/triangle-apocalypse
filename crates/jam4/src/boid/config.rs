@@ -86,7 +86,7 @@ impl FromWorld for BoidConfig {
 
     let (color_wild, color_tamed, color_tamed_boosted) = {
       let mut mats = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
-      let color_wild = mats.add(ColorMaterial::from(Color::rgb_u8(244, 175, 45)));
+      let color_wild = mats.add(ColorMaterial::from(Color::rgba_u8(244, 175, 45,40)));
       let color_tame = mats.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 0.5)));
       let color_tamed_boosted = mats.add(ColorMaterial::from(Color::rgb(0.5, 5.0, 5.0)));
       (color_wild, color_tame, color_tamed_boosted)

@@ -153,7 +153,7 @@ pub fn toggle_player_mode(
     boid.turning_speed = bconfig.min_turn_speed;
 
     for m in qry_music.iter_mut() {
-      m.set_speed(0.95);
+      m.set_speed(0.98);
     }
   }
 

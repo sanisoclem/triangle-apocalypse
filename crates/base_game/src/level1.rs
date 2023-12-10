@@ -22,16 +22,17 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
 
   let finish_bounds = sdfu::Box::new(Vec2::new(fbounds.z, fbounds.w)).translate(fbounds.xy());
   let terrain_shader = asset_server.load("preload/terrain.wgsl");
+  let fill_shader = asset_server.load("preload/terrain_fill.wgsl");
 
   let s = SmudShape {
-    color: Color::BLACK,
+    color: Color::RED,
     sdf: terrain_shader,
     frame: Frame::Quad(50000.),
-    ..default()
+    fill: fill_shader,
   };
 
   let lvl = LevelInfo {
-    bounds: MoveableBounds::from_sdf(shape),
+    bounds: MoveableBounds::from_sdf(shape.subtract(finish_bounds)),
     finish_bounds_box: MoveableBounds::from_sdf(finish_bounds),
     finish_bounds: fbounds,
     bounds_sdf: Some(s),
