@@ -1,6 +1,6 @@
 # Triangle Apocalypse
 
-Available to play at [https://shape-shepherd-sanisoclem.vercel.app/](https://shape-shepherd-sanisoclem.vercel.app/), also see [known issues](#known-issues).
+Available to play at [https://triangle-apocalypse.vercel.app/](https://triangle-apocalypse.vercel.app/), also see [known issues](#known-issues).
 
 ## Running from source
 
