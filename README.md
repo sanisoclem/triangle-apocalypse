@@ -44,6 +44,7 @@ $ basic-http-server wasm
  - [bevy_smud](https://github.com/johanhelsing/bevy_smud) - render SDFs
  - [sdfu](https://github.com/fu5ha/sdfu) - signed distance field utilities for defining bounds and checking collision (using a [fork](https://github.com/fu5ha/sdfu/compare/master...sanisoclem:sdfu:master) with minor changes)
  - [pristine_grid](https://github.com/rust-adventure/bevy-examples/blob/61981736c1afed1bdca85c9a5599001774844c8d/libs/bevy_shader_utils/shaders/pristine_grid.wgsl#L4-L38) - from [Chris Biscardi's showcase](https://discord.com/channels/691052431525675048/692648638823923732/1169146926466334731), used in the background shader
+ - https://github.com/joelleortiz for the logo
  - https://freesound.org/people/colorsCrimsonTears/sounds/607409/ - boost sound effect
  - https://freesound.org/people/TheBuilder15/sounds/352351/ - wind down sound effect
  - https://convertio.co/wav-ogg/ - used to convert the above 2 files to `.ogg`

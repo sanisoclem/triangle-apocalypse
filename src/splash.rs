@@ -61,7 +61,7 @@ impl From<&str> for SplashLog {
 }
 
 fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-  let icon = asset_server.load("Triangle Apocalypse.png");
+  let icon = asset_server.load("preload/Triangle Apocalypse.png");
   commands.spawn((Camera2dBundle::default(), OnSplashScreen));
   commands
     .spawn((
