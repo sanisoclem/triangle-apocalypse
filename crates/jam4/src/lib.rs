@@ -3,13 +3,13 @@ use bevy_smud::SmudPlugin;
 
 pub mod boid;
 mod components;
+mod finish_line;
+mod grid;
 pub mod level;
 mod mods;
 pub mod moveable;
 mod player;
 mod state;
-mod grid;
-mod finish_line;
 
 use boid::{
   calc_tamed_boids, calculate_boid_direction, despawn_collided_boids, draw_boid_gizmos,
@@ -20,7 +20,7 @@ use finish_line::FinishLineMaterial;
 use grid::GridMaterial;
 use level::{
   check_if_game_over, check_if_level_complete, find_level_to_load, on_load_level_requested,
-  LevelManager, LevelRegistry, time_level,
+  time_level, LevelManager, LevelRegistry,
 };
 pub use mods::*;
 use moveable::{move_moveables, MoveableBounds};
@@ -65,7 +65,6 @@ impl Jam4Extensions for App {
           update_tamed_boids,
           calculate_boid_direction,
           update_boid_velocity,
-          move_moveables,
           (
             time_level,
             check_if_game_over,
@@ -79,6 +78,7 @@ impl Jam4Extensions for App {
       .add_systems(
         Update,
         (
+          move_moveables,
           process_game_control_commands,
           (run_mod_update, draw_boid_gizmos).run_if(in_state(SimulationState::Simulating)),
           wait_until_initialization_complete.run_if(in_state(SimulationState::Initializing)),

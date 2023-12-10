@@ -5,9 +5,10 @@ use bevy_hanabi::prelude::*;
 pub struct BoidConfig {
   pub max_speed: f32,
   pub min_speed: f32,
+  pub wild_speed: f32,
   pub min_turn_speed: f32,
   pub max_turn_speed: f32,
-  pub safe_turn_speed: f32,
+  pub wild_turn_speed: f32,
   pub boundary: f32,
   pub cohesion: f32,
   pub alignment: f32,
@@ -93,10 +94,11 @@ impl FromWorld for BoidConfig {
 
     BoidConfig {
       max_speed: 1000.,
-      min_speed: 500.,
+      min_speed: 300.,
+      wild_speed: 800.,
       min_turn_speed: 1.0,
       max_turn_speed: 5.0,
-      safe_turn_speed: 10.0,
+      wild_turn_speed: 10.0,
       player_influence: 100.,
       boundary: 50.0,
       cohesion: 1.0,

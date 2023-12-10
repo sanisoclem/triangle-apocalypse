@@ -134,33 +134,42 @@ pub fn toggle_player_mode(
   keyboard_input: Res<Input<KeyCode>>,
   mut player: ResMut<PlayerInfo>,
   bconfig: Res<BoidConfig>,
+  mut qry_music : Query<(&mut AudioSink), With<BgMusic>>
 ) {
-  if !keyboard_input.just_pressed(KeyCode::Space) {
-    return;
-  }
   let Ok((mut fx, mut boid, mut mat)) = qry.get_single_mut() else {
     return;
   };
 
-  player.in_boost_mode = !player.in_boost_mode;
+  if keyboard_input.just_pressed(KeyCode::Space) {
+    player.in_boost_mode = true;
 
-  if player.in_boost_mode {
     cmd.spawn(AudioBundle {
       source: player.audio_boost.clone(),
       settings: PlaybackSettings::DESPAWN,
     });
     fx.handle = player.boost_particles.clone();
     *mat = player.boost_color.clone();
-    boid.speed = bconfig.max_speed;
+    boid.speed = bconfig.min_speed;
     boid.turning_speed = bconfig.min_turn_speed;
-  } else {
+
+    for m in qry_music.iter_mut() {
+      m.set_speed(0.95);
+    }
+  }
+
+  if keyboard_input.just_released(KeyCode::Space) {
+    player.in_boost_mode = false;
     cmd.spawn(AudioBundle {
       source: player.audio_slow.clone(),
       settings: PlaybackSettings::DESPAWN,
     });
     fx.handle = player.normal_particles.clone();
     *mat = player.normal_color.clone();
-    boid.speed = bconfig.min_speed;
+    boid.speed = bconfig.max_speed;
     boid.turning_speed = bconfig.max_turn_speed;
+
+    for m in qry_music.iter_mut() {
+      m.set_speed(1.0);
+    }
   }
 }

@@ -39,17 +39,17 @@ pub fn calc_tamed_boids(
       transform.translation.distance_squared(p_trans.translation) <= p_boid.vision * p_boid.vision;
     if is_tamed && !prev_is_tamed {
       if player.in_boost_mode {
-        boid.turning_speed = bconfig.min_turn_speed;
+        boid.turning_speed = bconfig.max_turn_speed;
         *color = bconfig.color_tamed_boosted.clone();
       } else {
-        boid.turning_speed = bconfig.max_turn_speed;
+        boid.turning_speed = bconfig.min_turn_speed;
         *color = bconfig.color_tamed.clone();
       }
       cmd.entity(e).insert(TamedBoid);
     }
     if !is_tamed && prev_is_tamed {
       *color = bconfig.color_wild.clone();
-      boid.turning_speed = bconfig.safe_turn_speed;
+      boid.turning_speed = bconfig.wild_turn_speed;
       cmd.entity(e).remove::<TamedBoid>();
     }
   }
@@ -104,7 +104,7 @@ pub fn calculate_boid_direction(
     if *is_tamed {
       b.speed = b.speed + (speed_change - b.speed);
     } else if !b.is_player {
-      b.speed = bconfig.min_speed;
+      b.speed = bconfig.wild_speed;
     }
 
     if bconfig.show_direction {
@@ -120,10 +120,10 @@ pub fn update_tamed_boids(
 ) {
   for (mut boid, mut color) in qry.iter_mut() {
     if player.in_boost_mode {
-      boid.turning_speed = bconfig.min_turn_speed;
+      boid.turning_speed = bconfig.max_turn_speed;
       *color = bconfig.color_tamed_boosted.clone();
     } else {
-      boid.turning_speed = bconfig.max_turn_speed;
+      boid.turning_speed = bconfig.min_turn_speed;
       *color = bconfig.color_tamed.clone();
     }
   }

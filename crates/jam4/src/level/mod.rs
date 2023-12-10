@@ -4,9 +4,10 @@ use bevy_smud::{Frame, ShapeBundle};
 
 use crate::{
   boid::{Boid, BoidConfig, TamedBoid},
+  finish_line::{build_finish_line, FinishLineMaterial},
   grid::{build_grid, GridMaterial},
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
-  spawn_player, Player, PlayerInfo, Simulation, SimulationState, finish_line::{build_finish_line, FinishLineMaterial},
+  spawn_player, Player, PlayerInfo, Simulation, SimulationState,
 };
 
 mod registry;
@@ -77,7 +78,6 @@ pub fn check_if_game_over(
   ));
 }
 
-
 pub fn on_load_level_requested(
   mut cmd: Commands,
   mut lvl_mgr: ResMut<LevelManager>,
@@ -128,7 +128,8 @@ pub fn on_load_level_requested(
     &mut cmd,
     &mut meshes,
     &mut fline_mats,
-    to_load.finish_bounds);
+    to_load.finish_bounds,
+  );
 
   // update bounds
   *bounds = to_load.bounds.clone();
@@ -142,17 +143,18 @@ pub fn on_load_level_requested(
           mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
           material: bconfig.color_wild.clone(),
           transform: Transform::from_translation(
-            point.extend(0.0) + Vec3::new(x as f32 * 23., 0.0, 0.0),
+            point.extend(0.0) + Quat::from_rotation_z(x as f32 * 27. / 5.).mul_vec3( Vec3::Y),
           )
-          .with_scale(Vec3::new(1.0, 2.0, 1.0)),
+          .with_scale(Vec3::new(1.0, 2.0, 1.0))
+          .looking_at(point.extend(0.0), Vec3::Z),
           ..default()
         })
         .insert((
           Moveable::default(),
           Boid {
             direction: Mat2::from_angle(x as f32).mul_vec2(Vec2::Y),
-            turning_speed: bconfig.max_turn_speed,
-            speed: bconfig.min_speed,
+            turning_speed: bconfig.wild_turn_speed,
+            speed: bconfig.wild_speed,
             ..default()
           },
           Simulation,
