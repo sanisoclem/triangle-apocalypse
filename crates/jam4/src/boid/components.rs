@@ -17,19 +17,6 @@ pub struct Boid {
   pub turning_speed: f32,
 }
 
-impl Default for Boid {
-  fn default() -> Self {
-    Boid {
-      direction: Vec2::Y,
-      vision: 400.0,
-      personal_space: 50.0,
-      is_player: false,
-      speed: 500.,
-      turning_speed: 10.0,
-    }
-  }
-}
-
 impl Boid {
   pub fn calculate_bounds_force(
     &self,

@@ -134,7 +134,7 @@ pub fn on_load_level_requested(
   // update bounds
   *bounds = to_load.bounds.clone();
 
-  spawn_player(&mut cmd, &player, to_load.starting_point).insert(Simulation);
+  spawn_player(&mut cmd, &player, to_load.starting_point, &bconfig).insert(Simulation);
 
   for point in to_load.spawn_points.iter() {
     for x in 0..to_load.boids_per_spawn_point {
@@ -143,7 +143,7 @@ pub fn on_load_level_requested(
           mesh: meshes.add(shape::RegularPolygon::new(10., 3).into()).into(),
           material: bconfig.color_wild.clone(),
           transform: Transform::from_translation(
-            point.extend(0.0) + Quat::from_rotation_z(x as f32 * 27. / 5.).mul_vec3( Vec3::Y),
+            point.extend(0.0) + Quat::from_rotation_z(x as f32 * 27. / 5.).mul_vec3(Vec3::Y),
           )
           .with_scale(Vec3::new(1.0, 2.0, 1.0))
           .looking_at(point.extend(0.0), Vec3::Z),
@@ -155,7 +155,9 @@ pub fn on_load_level_requested(
             direction: Mat2::from_angle(x as f32).mul_vec2(Vec2::Y),
             turning_speed: bconfig.wild_turn_speed,
             speed: bconfig.wild_speed,
-            ..default()
+            is_player: false,
+            personal_space: 20.,
+            vision: 400.,
           },
           Simulation,
         ))

@@ -1,7 +1,10 @@
 use bevy::{ecs::system::EntityCommands, prelude::*, sprite::Mesh2dHandle};
 use bevy_hanabi::prelude::*;
 
-use crate::{boid::Boid, moveable::Moveable};
+use crate::{
+  boid::{Boid, BoidConfig},
+  moveable::Moveable,
+};
 
 #[derive(Resource)]
 pub struct PlayerInfo {
@@ -160,43 +163,32 @@ pub struct PlayerBundle {
   pub compiled_effect: CompiledParticleEffect,
 }
 
-impl Default for PlayerBundle {
-  fn default() -> Self {
-    Self {
-      moveable: Moveable { ..default() },
-      boid: Boid {
-        is_player: true,
-        personal_space: 100.,
-        turning_speed: 5.,
-        vision: 800.0,
-        ..default()
-      },
-      compiled_effect: CompiledParticleEffect::default(),
-      effect: ParticleEffect::default(),
-      mesh: default(),
-      material: default(),
-      transform: default(),
-      global_transform: default(),
-      visibility: default(),
-      inherited_visibility: default(),
-      view_visibility: default(),
-      player: Player,
-    }
-  }
-}
-
 pub fn spawn_player<'w, 's, 'a>(
   cmd: &'a mut Commands<'w, 's>,
   player: &PlayerInfo,
   spawn_point: Vec2,
+  bconfig: &BoidConfig,
 ) -> EntityCommands<'w, 's, 'a> {
   cmd.spawn(PlayerBundle {
+    moveable: Moveable::default(),
+    boid: Boid {
+      is_player: true,
+      personal_space: 100.,
+      turning_speed: bconfig.min_turn_speed,
+      vision: 800.0,
+      direction: Vec2::Y,
+      speed: bconfig.max_speed,
+    },
     mesh: player.mesh.clone(),
     effect: ParticleEffect::new(player.normal_particles.clone()),
     compiled_effect: CompiledParticleEffect::default(),
     material: player.normal_color.clone(),
     transform: Transform::from_translation(spawn_point.extend(-1.0))
       .with_scale(Vec3::new(1.0, 2.0, 1.0)),
-    ..default()
+    global_transform: default(),
+    visibility: default(),
+    inherited_visibility: default(),
+    view_visibility: default(),
+    player: Player,
   })
 }
