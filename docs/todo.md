@@ -11,7 +11,7 @@
     - movement
     - mass rescue
     - strategic slow
-    - moving obstacles
+    - moving obstacles/finding nemo
     - time attack
     - everything in one
 
