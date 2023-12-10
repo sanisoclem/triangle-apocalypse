@@ -1,4 +1,17 @@
-use bevy::{asset::LoadedFolder, prelude::*};
+use bevy::{
+  asset::LoadedFolder,
+  core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+  prelude::*,
+  render::{
+    camera::ScalingMode,
+    mesh::{Indices, MeshVertexBufferLayout},
+    render_resource::{
+      AsBindGroup, PrimitiveTopology, RenderPipelineDescriptor, ShaderRef,
+      SpecializedMeshPipelineError,
+    },
+  },
+  sprite::{Material2d, Material2dKey, Material2dPlugin, MaterialMesh2dBundle, Mesh2dHandle},
+};
 use jam4::{GameControlCommand, ModManager, SimulationState};
 use utils::{despawn_screen, text::TextAnimation};
 
@@ -13,12 +26,13 @@ pub trait SplashExtensions {
 impl SplashExtensions for App {
   fn add_splash_screen<T: States + Copy>(&mut self, show_on_state: T, next_state: T) -> &mut Self {
     self
+      .add_plugins(Material2dPlugin::<SplashMaterial>::default())
       .init_resource::<SplashState>()
       .insert_resource(SplashNextState(next_state))
       .add_event::<SplashLog>()
       .add_systems(
         OnEnter(show_on_state),
-        (preload_assets, (splash_setup, init_game)).chain(),
+        (preload_assets, build_bg, (splash_setup, init_game)).chain(),
       )
       .add_systems(
         Update,
@@ -62,7 +76,17 @@ impl From<&str> for SplashLog {
 
 fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
   let icon = asset_server.load("preload/Triangle Apocalypse.png");
-  commands.spawn((Camera2dBundle::default(), OnSplashScreen));
+  let mut cam = Camera2dBundle {
+    camera: Camera {
+      hdr: true, // 1. HDR is required for bloom
+      ..default()
+    },
+    tonemapping: Tonemapping::TonyMcMapface, /* 2. Using a tonemapper that desaturates to white
+                                              *    is recommended */
+    ..default()
+  };
+  cam.projection.scaling_mode = ScalingMode::FixedVertical(1200.0);
+  commands.spawn((cam, BloomSettings::default(), OnSplashScreen));
   commands
     .spawn((
       NodeBundle {
@@ -75,7 +99,6 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
           flex_direction: FlexDirection::Column,
           ..default()
         },
-        background_color: BackgroundColor(Color::BLACK),
         ..default()
       },
       OnSplashScreen,
@@ -237,5 +260,63 @@ fn go_to_next_state<T: States>(
   {
     cmds.send(GameControlCommand::StartGame);
     app_state.set(next_state.0.clone());
+  }
+}
+
+pub fn build_bg(
+  mut commands: Commands,
+  mut meshes: ResMut<Assets<Mesh>>,
+  mut materials: ResMut<Assets<SplashMaterial>>,
+) {
+  let frame_size = Vec2::new(5000., 5000.);
+  let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
+
+  let v_pos = vec![
+    [-frame_size.x, -frame_size.y, 0.0],
+    [-frame_size.x, frame_size.y, 0.0],
+    [frame_size.x, frame_size.y, 0.0],
+    [frame_size.x, -frame_size.y, 0.0],
+  ];
+  mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, v_pos);
+
+  let uvs: Vec<[f32; 2]> = vec![[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]];
+
+  mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+
+  let indices = vec![0, 2, 1, 2, 0, 3];
+  mesh.set_indices(Some(Indices::U32(indices)));
+
+  commands
+    .spawn(MaterialMesh2dBundle {
+      mesh: Mesh2dHandle(meshes.add(mesh)),
+      material: materials.add(SplashMaterial {}),
+      transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
+      ..default()
+    })
+    .insert(OnSplashScreen);
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct SplashMaterial {}
+
+impl Material2d for SplashMaterial {
+  fn fragment_shader() -> ShaderRef {
+    "preload/splash.wgsl".into()
+  }
+  fn vertex_shader() -> ShaderRef {
+    "preload/splash.wgsl".into()
+  }
+
+  fn specialize(
+    descriptor: &mut RenderPipelineDescriptor,
+    layout: &MeshVertexBufferLayout,
+    _key: Material2dKey<Self>,
+  ) -> Result<(), SpecializedMeshPipelineError> {
+    let vertex_layout = layout.get_layout(&[
+      Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+      Mesh::ATTRIBUTE_UV_0.at_shader_location(1),
+    ])?;
+    descriptor.vertex.buffers = vec![vertex_layout];
+    Ok(())
   }
 }

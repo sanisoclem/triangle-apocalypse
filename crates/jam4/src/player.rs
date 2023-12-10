@@ -26,7 +26,7 @@ impl FromWorld for PlayerInfo {
       let mut mats = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
       (
         mats.add(ColorMaterial::from(Color::rgb(0.0, 0.0, 10.0))),
-        mats.add(ColorMaterial::from(Color::rgb(7.0, 1.5, 0.0))),
+        mats.add(ColorMaterial::from(Color::rgb(10.0, 0.0, 0.0))),
       )
     };
 

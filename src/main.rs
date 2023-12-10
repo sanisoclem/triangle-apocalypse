@@ -35,6 +35,7 @@ pub fn main_wasm() {
 fn main() {
   let mut app = App::new();
   app
+    .insert_resource(ClearColor(Color::BLACK))
     .add_plugins(DefaultPlugins)
     .add_plugins((utils::text::TextAnimationPlugin, utils::music::MusicPlugin))
     .add_plugins(HanabiPlugin)
