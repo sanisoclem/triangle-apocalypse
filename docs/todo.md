@@ -11,7 +11,7 @@
     - movement
     - mass rescue
     - strategic slow
-    - moving obstacles/finding nemo
+    - moving obstacles/finding nemo/environment effects/effect tiles
     - time attack
     - everything in one
 
