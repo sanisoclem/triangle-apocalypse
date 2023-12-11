@@ -6,7 +6,7 @@ use jam4::{level::LevelInfo, moveable::MoveableBounds};
 use sdfu::SDF;
 
 pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
-  let w = 1000.;
+  let w = 500.;
   let h = 10000.;
   let fbounds = Vec4::new(0.0, 10_000., 5_000., 5_000.);
 

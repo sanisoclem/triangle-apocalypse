@@ -1,0 +1,45 @@
+thread 'rustc' panicked at compiler\rustc_metadata\src\rmeta\def_path_hash_map.rs:22:85:
+called `Option::unwrap()` on a `None` value
+stack backtrace:
+   0:     0x7ffe6826ddff - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   1:     0x7ffe6826dd64 - std::backtrace::Backtrace::force_capture::hccb50e38e808201a
+   2:     0x7ffe455ac809 - <tracing_subscriber[ffa68c423620bd77]::util::TryInitError as core[af6b10dabc404445]::fmt::Display>::fmt
+   3:     0x7ffe68286ea3 - std::panicking::rust_panic_with_hook::hf41a427add849925
+   4:     0x7ffe68286d0b - <std::panicking::begin_panic_handler::StaticStrPayload as core::panic::PanicPayload>::take_box::h5b889be2aedab7f6
+   5:     0x7ffe68283ee9 - <std::sys_common::backtrace::_print::DisplayBacktrace as core::fmt::Display>::fmt::h727175ac663d571a
+   6:     0x7ffe68286a54 - rust_begin_unwind
+   7:     0x7ffe682db697 - core::panicking::panic_fmt::h6d8d22bd10df0bf7
+   8:     0x7ffe682db722 - core::panicking::panic::hcec2d35eda8cfb99
+   9:     0x7ffe45196715 - <rustc_metadata[60103ce1dbfa0992]::creader::CStore as rustc_session[9859ecff04834aee]::cstore::CrateStore>::def_path_hash_to_def_id
+  10:     0x7ffe45481a89 - <rustc_middle[2a0a5cf741684306]::ty::context::TyCtxt>::def_path_hash_to_def_id
+  11:     0x7ffe44e37628 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  12:     0x7ffe440ca453 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  13:     0x7ffe440a79b4 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  14:     0x7ffe44087df1 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  15:     0x7ffe440d28fe - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  16:     0x7ffe44f02826 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  17:     0x7ffe440cf125 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  18:     0x7ffe44e92698 - <rustc_query_impl[b2ac1db4e5254f8c]::plumbing::QueryCtxt as rustc_query_system[71305d975d7b23bc]::query::QueryContext>::load_side_effects
+  19:     0x7ffe440d2ac2 - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  20:     0x7ffe44078b1d - rustc_query_impl[b2ac1db4e5254f8c]::profiling_support::alloc_self_profile_query_strings
+  21:     0x7ffe45445159 - <rustc_middle[2a0a5cf741684306]::ty::assoc::AssocItems>::find_by_name_and_namespace
+  22:     0x7ffe443e87e2 - <rustc_middle[2a0a5cf741684306]::query::on_disk_cache::OnDiskCache>::drop_serialized_data
+  23:     0x7ffe44249eef - rustc_incremental[c997d0d32de0c65d]::persist::fs::finalize_session_directory
+  24:     0x7ffe4424243e - rustc_symbol_mangling[cd9c4a19c12070c6]::test::report_symbol_names
+  25:     0x7ffe4424a540 - rustc_incremental[c997d0d32de0c65d]::persist::fs::finalize_session_directory
+  26:     0x7ffe44250818 - rustc_incremental[c997d0d32de0c65d]::persist::save::save_work_product_index
+  27:     0x7ffe4424c4e1 - rustc_incremental[c997d0d32de0c65d]::persist::save::save_dep_graph
+  28:     0x7ffe415a068e - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  29:     0x7ffe415a6009 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  30:     0x7ffe415deec3 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  31:     0x7ffe415a1e6a - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  32:     0x7ffe415df9f1 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  33:     0x7ffe415a465f - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  34:     0x7ffe415a4778 - <rustc_middle[2a0a5cf741684306]::ty::SymbolName as core[af6b10dabc404445]::fmt::Display>::fmt
+  35:     0x7ffe68298f4c - std::sys::windows::thread::Thread::new::hfbde1f52ebd2d066
+  36:     0x7fff7c9b257d - BaseThreadInitThunk
+  37:     0x7fff7e44aa58 - RtlUserThreadStart
+
+
+rustc version: 1.76.0-nightly (0e2dac837 2023-12-04)
+platform: x86_64-pc-windows-msvc
