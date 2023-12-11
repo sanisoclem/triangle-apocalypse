@@ -1,40 +1,32 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{math::vec2, prelude::*};
 use bevy_smud::prelude::*;
 use jam4::{level::LevelInfo, moveable::MoveableBounds};
 use sdfu::SDF;
 
+use crate::sdf::{build_maze, build_track, Flip};
+
 pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
-  let w = 4000.;
-  let h = w * 2.0 + 1000.;
-  let wp = 500.;
+  let p = 200.;
+  let w = p * 20.;
+  let mh = p * 20.;
+  let th = 10000.0;
+  let h = th + mh + mh;
   let border = 3000.;
-  let hw = (h - 2.0 * w) / 2. + 200.;
 
-  let fbounds = Vec4::new(0.0, h + 4_000., 5_000., 5_000.);
-
+  let fbounds = Vec4::new(0.0, h + (w - 1000.), w, w);
   let outer = sdfu::Box::new(Vec2::new(w + border, h + border));
-  let inner1 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, h - hw));
-  let inner2 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, -h + hw));
-  let inner = inner1.union(inner2);
-  let mid_box = sdfu::Box::new(Vec2::new(wp, wp));
+  let inner = sdfu::Box::new(Vec2::new(w, h));
 
-  let s1p = Vec2::new(0.0, -w);
-  let s1a = sdfu::Circle::new(w).translate(s1p);
-  let s1b = sdfu::Circle::new(w - wp).translate(s1p);
+  let m1 = Flip::new(build_maze(p)).translate(Vec2::new(0.0, (th + mh / 1.0)));
+  let m2 = build_maze(p).translate(Vec2::new(0.0, (-th - mh / 1.0)));
+  let t1 = build_track(w, th);
 
-  let s2p = Vec2::new(0.0, w);
-  let s2a = sdfu::Circle::new(w).translate(s2p);
-  let s2b = sdfu::Circle::new(w - wp).translate(s2p);
-
-  let sa = s1a.union(s2a);
-  let sb = s1b.union(s2b);
-
-  let shape = outer.subtract(sa.subtract(sb).union(mid_box).union(inner));
+  let shape = outer.subtract(inner.subtract(m1.union(m2).union(t1)));
 
   let finish_bounds = sdfu::Box::new(Vec2::new(fbounds.z, fbounds.w)).translate(fbounds.xy());
-  let terrain_shader = asset_server.load("preload/terrain4.wgsl");
+  let terrain_shader = asset_server.load("preload/terrain7.wgsl");
   let fill_shader = asset_server.load("preload/terrain_fill.wgsl");
 
   let s = SmudShape {
@@ -49,14 +41,24 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
     finish_bounds_box: MoveableBounds::from_sdf(finish_bounds),
     finish_bounds: fbounds,
     bounds_sdf: Some(s),
-    name: "Level 3".to_owned(),
+    name: "Level 7".to_owned(),
     next_level: None,
-    starting_point: Vec2::new(0.0, -h + 10.),
+    starting_point: Vec2::new(p * 15., p * -14.0 - (th + mh)),
     boids_per_spawn_point: 40,
-    spawn_points: vec![Vec2::new(-w * 0.75, -h), Vec2::new(w * 0.75, -h)],
-    rescue_goal: 20.into(),
-    time_goal: Duration::from_secs(60).into(),
-    wander: false,
+    spawn_points: vec![
+      (p * 15., p * -6.0),
+      (p * -4.0, p * -14.0),
+      (p * -18.0, p * -11.0),
+      (p * -16.0, p * 4.0),
+      (p * 3.0, p * 6.0),
+      (p * 12.0, p * 6.0),
+    ]
+    .into_iter()
+    .map(|(x, y)| Vec2::new(x, y - (th + mh)))
+    .collect(),
+    rescue_goal: 100.into(),
+    time_goal: Duration::from_secs(120).into(),
+    wander: true,
   };
   lvl
 }

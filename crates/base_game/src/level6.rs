@@ -5,44 +5,7 @@ use bevy_smud::prelude::*;
 use jam4::{level::LevelInfo, moveable::MoveableBounds};
 use sdfu::{ops::HardMin, Dim2D, Triangle, SDF};
 
-fn build_track(
-  w: f32,
-  h: f32,
-) -> sdfu::ops::Union<
-  f32,
-  sdfu::ops::Union<
-    f32,
-    sdfu::ops::Union<
-      f32,
-      sdfu::ops::Union<
-        f32,
-        Triangle<bevy::prelude::Vec2, Dim2D>,
-        Triangle<bevy::prelude::Vec2, Dim2D>,
-        HardMin<f32>,
-      >,
-      Triangle<bevy::prelude::Vec2, Dim2D>,
-      HardMin<f32>,
-    >,
-    Triangle<bevy::prelude::Vec2, Dim2D>,
-    HardMin<f32>,
-  >,
-  Triangle<bevy::prelude::Vec2, Dim2D>,
-  HardMin<f32>,
-> {
-  let angle = f32::atan(3. * (w / 2.) / h);
-  let h2 = w / (2.0 * angle.tan());
-
-  let t1 = sdfu::Triangle::new([Vec2::new(0.0, h2), Vec2::new(0.0, -h2), Vec2::new(w, h)]);
-  let t2 = sdfu::Triangle::new([Vec2::new(0.0, -h2), Vec2::new(w, h), Vec2::new(w, -h)]);
-  let t3 = sdfu::Triangle::new([Vec2::new(-w, 0.), Vec2::new(-w, h), Vec2::new(w / 2., h)]);
-  let t4 = sdfu::Triangle::new([Vec2::new(-w, 0.), Vec2::new(-w, -h), Vec2::new(w / 2., -h)]);
-  let t5 = sdfu::Triangle::new([
-    Vec2::new(-w / 2.0, h2),
-    Vec2::new(-w / 2.0, -h2),
-    Vec2::new(-w, 0.),
-  ]);
-  t1.union(t2).union(t3).union(t4).union(t5)
-}
+use crate::sdf::build_track;
 
 pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
   let w = 2000.;
@@ -51,8 +14,6 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
   let h = segments * sh;
 
   let fbounds = Vec4::new(0.0, h + (w - 1000.), w, w);
-  let angle = f32::atan(3. * (w / 2.) / h);
-  let h2 = w / (2.0 * angle.tan());
 
   let outer = sdfu::Box::new(Vec2::new(w + 3000., h + 3000.));
   let inner = sdfu::Box::new(Vec2::new(w, h));

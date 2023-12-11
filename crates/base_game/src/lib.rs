@@ -11,6 +11,7 @@ mod level4;
 mod level5;
 mod level6;
 mod level7;
+mod sdf;
 
 pub fn get_module() -> GameModuleDescriptor {
   GameModuleDescriptor::Native(NativeGameModule {
