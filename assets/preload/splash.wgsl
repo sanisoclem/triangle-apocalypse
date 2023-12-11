@@ -116,7 +116,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
             * cos(in.world_position.x / 41.) );
     let slow_y = pow(fract((in.world_position.y + (x1 * 10000.) - (globals.time * 700.)) /10000.), 20.);
     let fast_y = pow(fract((in.world_position.y - ((globals.time - 1.1) * 12500.)) /50000.),50.);
-    let y_color =  mix(blue,red,in.world_position.y);
+    let y_color =  mix(red,blue,in.world_position.y);
 
     var f = 0.0;
     if fast_y >= 0.995 {

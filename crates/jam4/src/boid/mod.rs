@@ -1,4 +1,5 @@
 use crate::{
+  level::{LevelManager, LevelRegistry},
   moveable::{CollidedWithBounds, Moveable, MoveableBounds},
   Player, PlayerInfo,
 };
@@ -80,13 +81,25 @@ pub fn calculate_boid_direction(
   bounds: Res<MoveableBounds>,
   bconfig: Res<BoidConfig>,
   time: Res<Time>,
+  lvl_mgr: Res<LevelManager>,
+  lvl_reg: Res<LevelRegistry>,
 ) {
+  let level_id = lvl_mgr.current_level.unwrap();
+  let lvl = lvl_reg.get_level(&level_id);
+
   let changes = qry
     .iter()
     .map(|(e, t1, boid, tamed)| {
       let pos = t1.translation.xy();
-      let (force, speed_change) =
-        boid.calculate_forces(&qry, &bconfig, pos, &bounds, tamed.is_some(), &mut gizmos);
+      let (force, speed_change) = boid.calculate_forces(
+        &qry,
+        &bconfig,
+        pos,
+        &bounds,
+        &lvl.finish_bounds_box,
+        tamed.is_some(),
+        &mut gizmos,
+      );
 
       if bconfig.show_forces {
         gizmos.ray_2d(pos, force * boid.vision, Color::CYAN);

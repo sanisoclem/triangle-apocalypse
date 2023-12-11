@@ -49,7 +49,7 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
     finish_bounds_box: MoveableBounds::from_sdf(finish_bounds),
     finish_bounds: fbounds,
     bounds_sdf: Some(s),
-    name: "Level 3".to_owned(),
+    name: "Level 4".to_owned(),
     next_level: None,
     starting_point: Vec2::new(0.0, -h + 10.),
     boids_per_spawn_point: 40,

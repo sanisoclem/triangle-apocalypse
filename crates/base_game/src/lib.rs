@@ -8,6 +8,9 @@ mod level1;
 mod level2;
 mod level3;
 mod level4;
+mod level5;
+mod level6;
+mod level7;
 
 pub fn get_module() -> GameModuleDescriptor {
   GameModuleDescriptor::Native(NativeGameModule {
@@ -30,6 +33,10 @@ pub fn on_init(mut lvl_registry: ResMut<LevelRegistry>, asset_server: Res<AssetS
   let lvl_id2 = 2u8.into();
   let lvl_id3 = 3u8.into();
   let lvl_id4 = 4u8.into();
+  let lvl_id5 = 5u8.into();
+  let lvl_id6 = 6u8.into();
+  let lvl_id7 = 7u8.into();
+
   lvl_registry.levels.insert(
     lvl_id1,
     LevelInfo {
@@ -51,8 +58,29 @@ pub fn on_init(mut lvl_registry: ResMut<LevelRegistry>, asset_server: Res<AssetS
       ..level3::build_level(&asset_server)
     },
   );
+  lvl_registry.levels.insert(
+    lvl_id4,
+    LevelInfo {
+      next_level: Some(lvl_id5),
+      ..level4::build_level(&asset_server)
+    },
+  );
+  lvl_registry.levels.insert(
+    lvl_id5,
+    LevelInfo {
+      next_level: Some(lvl_id6),
+      ..level5::build_level(&asset_server)
+    },
+  );
+  lvl_registry.levels.insert(
+    lvl_id6,
+    LevelInfo {
+      next_level: Some(lvl_id7),
+      ..level6::build_level(&asset_server)
+    },
+  );
   lvl_registry
     .levels
-    .insert(lvl_id4, level4::build_level(&asset_server));
+    .insert(lvl_id7, level7::build_level(&asset_server));
   lvl_registry.start_level = Some(lvl_id1);
 }

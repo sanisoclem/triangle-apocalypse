@@ -23,6 +23,7 @@ impl Boid {
     bconfig: &BoidConfig,
     position: Vec2,
     bounds: &MoveableBounds,
+    finish_bounds: &MoveableBounds,
   ) -> Vec2 {
     let v = self.direction * self.vision;
     let tx2 = position + v;
@@ -30,16 +31,13 @@ impl Boid {
     let rayl = position + bconfig.lprobe.mul_vec2(v);
     let rayr = position + bconfig.rprobe.mul_vec2(v);
 
-    let colf = bounds.distance_to_edge(tx2);
-    let coll = bounds.distance_to_edge(rayl);
-    let colr = bounds.distance_to_edge(rayr);
+    let coll =  bounds.distance_to_edge(rayl).min(finish_bounds.distance_to_edge(rayl));
+    let colr = bounds.distance_to_edge(rayr).min(finish_bounds.distance_to_edge(rayr));
 
     if coll < 0.0 && coll < colr {
       return bconfig.rforce.mul_vec2(self.direction);
     } else if colr < 0.0 {
       return bconfig.lforce.mul_vec2(self.direction);
-    } else if colf < 0.0 {
-      return bounds.edge_normal(tx2);
     }
 
     Vec2::ZERO
@@ -52,6 +50,7 @@ impl Boid {
     bconfig: &BoidConfig,
     position2d: Vec2,
     bounds: &MoveableBounds,
+    finish_bounds: &MoveableBounds,
     is_tamed: bool,
     _gizmos: &mut Gizmos,
   ) -> (Vec2, f32) {
@@ -60,7 +59,7 @@ impl Boid {
       return (Vec2::ZERO, self.speed);
     }
 
-    let bounds_force = self.calculate_bounds_force(bconfig, position2d, bounds);
+    let bounds_force = self.calculate_bounds_force(bconfig, position2d, bounds, finish_bounds);
     let mut separation_force = Vec2::ZERO;
     let mut cohesion_force = Vec2::ZERO;
     let mut alignment_force = Vec2::ZERO;

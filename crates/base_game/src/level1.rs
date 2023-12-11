@@ -40,7 +40,7 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
     next_level: None,
     starting_point: Vec2::new(0.0, -h),
     boids_per_spawn_point: 30,
-    spawn_points: vec![Vec2::new(0., 3000.), Vec2::new(0., -3000.),Vec2::new(0.0, -9000.)],
+    spawn_points: vec![Vec2::new(-w/2., 0.), Vec2::new(w/2., 0.),Vec2::new(0.0, -7000.)],
     rescue_goal: 20.into(),
     time_goal: Duration::from_secs(120).into(),
     wander: false,

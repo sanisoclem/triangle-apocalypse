@@ -15,13 +15,14 @@ pub fn follow_player(
 ) {
   for mut cam_transform in qry_camera.iter_mut() {
     if let Ok((target_transform, boid)) = qry_transform.get_single() {
-      let target = (target_transform.translation.xy() + boid.direction * boid.speed * 1.5)
+      let target = (target_transform.translation.xy() + boid.direction * boid.speed )
         .extend(cam_transform.translation.z);
 
-      if target.distance_squared(cam_transform.translation) > 4000000. {
+      let lookahead = 2000.;
+      if target.distance_squared(cam_transform.translation) > lookahead * lookahead  {
         cam_transform.translation = target;
       } else {
-        cam_transform.translation = cam_transform.translation.lerp(target, time.delta_seconds());
+        cam_transform.translation = cam_transform.translation.lerp(target, time.delta_seconds()*1.2);
       }
     }
   }
