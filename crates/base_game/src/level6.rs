@@ -3,38 +3,69 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_smud::prelude::*;
 use jam4::{level::LevelInfo, moveable::MoveableBounds};
-use sdfu::SDF;
+use sdfu::{ops::HardMin, Dim2D, Triangle, SDF};
+
+fn build_track(
+  w: f32,
+  h: f32,
+) -> sdfu::ops::Union<
+  f32,
+  sdfu::ops::Union<
+    f32,
+    sdfu::ops::Union<
+      f32,
+      sdfu::ops::Union<
+        f32,
+        Triangle<bevy::prelude::Vec2, Dim2D>,
+        Triangle<bevy::prelude::Vec2, Dim2D>,
+        HardMin<f32>,
+      >,
+      Triangle<bevy::prelude::Vec2, Dim2D>,
+      HardMin<f32>,
+    >,
+    Triangle<bevy::prelude::Vec2, Dim2D>,
+    HardMin<f32>,
+  >,
+  Triangle<bevy::prelude::Vec2, Dim2D>,
+  HardMin<f32>,
+> {
+  let angle = f32::atan(3. * (w / 2.) / h);
+  let h2 = w / (2.0 * angle.tan());
+
+  let t1 = sdfu::Triangle::new([Vec2::new(0.0, h2), Vec2::new(0.0, -h2), Vec2::new(w, h)]);
+  let t2 = sdfu::Triangle::new([Vec2::new(0.0, -h2), Vec2::new(w, h), Vec2::new(w, -h)]);
+  let t3 = sdfu::Triangle::new([Vec2::new(-w, 0.), Vec2::new(-w, h), Vec2::new(w / 2., h)]);
+  let t4 = sdfu::Triangle::new([Vec2::new(-w, 0.), Vec2::new(-w, -h), Vec2::new(w / 2., -h)]);
+  let t5 = sdfu::Triangle::new([
+    Vec2::new(-w / 2.0, h2),
+    Vec2::new(-w / 2.0, -h2),
+    Vec2::new(-w, 0.),
+  ]);
+  t1.union(t2).union(t3).union(t4).union(t5)
+}
 
 pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
-  let w = 4000.;
-  let h = w * 2.0 + 1000.;
-  let wp = 500.;
-  let border = 3000.;
-  let hw = (h - 2.0 * w) / 2. + 200.;
+  let w = 2000.;
+  let segments = 4.0;
+  let sh = 10000.;
+  let h = segments * sh;
 
-  let fbounds = Vec4::new(0.0, h + 4_000., 5_000., 5_000.);
+  let fbounds = Vec4::new(0.0, h + (w - 1000.), w, w);
+  let angle = f32::atan(3. * (w / 2.) / h);
+  let h2 = w / (2.0 * angle.tan());
 
-  let outer = sdfu::Box::new(Vec2::new(w + border, h + border));
-  let inner1 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, h - hw));
-  let inner2 = sdfu::Box::new(Vec2::new(w, hw)).translate(Vec2::new(0.0, -h + hw));
-  let inner = inner1.union(inner2);
-  let mid_box = sdfu::Box::new(Vec2::new(wp, wp));
+  let outer = sdfu::Box::new(Vec2::new(w + 3000., h + 3000.));
+  let inner = sdfu::Box::new(Vec2::new(w, h));
 
-  let s1p = Vec2::new(0.0, -w);
-  let s1a = sdfu::Circle::new(w).translate(s1p);
-  let s1b = sdfu::Circle::new(w - wp).translate(s1p);
+  let t1 = build_track(w, sh).translate((0.0, sh * 3.0).into());
+  let t2 = build_track(w, sh).translate((0.0, sh * 1.0).into());
+  let t3 = build_track(w, sh).translate((0.0, sh * -1.0).into());
+  let t4 = build_track(w, sh).translate((0.0, sh * -3.0).into());
 
-  let s2p = Vec2::new(0.0, w);
-  let s2a = sdfu::Circle::new(w).translate(s2p);
-  let s2b = sdfu::Circle::new(w - wp).translate(s2p);
-
-  let sa = s1a.union(s2a);
-  let sb = s1b.union(s2b);
-
-  let shape = outer.subtract(sa.subtract(sb).union(mid_box).union(inner));
+  let shape = outer.subtract(inner.subtract(t1.union(t2).union(t3).union(t4)));
 
   let finish_bounds = sdfu::Box::new(Vec2::new(fbounds.z, fbounds.w)).translate(fbounds.xy());
-  let terrain_shader = asset_server.load("preload/terrain4.wgsl");
+  let terrain_shader = asset_server.load("preload/terrain6.wgsl");
   let fill_shader = asset_server.load("preload/terrain_fill.wgsl");
 
   let s = SmudShape {
@@ -49,13 +80,16 @@ pub fn build_level(asset_server: &AssetServer) -> LevelInfo {
     finish_bounds_box: MoveableBounds::from_sdf(finish_bounds),
     finish_bounds: fbounds,
     bounds_sdf: Some(s),
-    name: "Level 3".to_owned(),
+    name: "Level 6".to_owned(),
     next_level: None,
-    starting_point: Vec2::new(0.0, -h + 10.),
-    boids_per_spawn_point: 40,
-    spawn_points: vec![Vec2::new(-w * 0.75, -h), Vec2::new(w * 0.75, -h)],
+    starting_point: Vec2::new(w * 0.75, -h),
+    boids_per_spawn_point: 20,
+    spawn_points: vec![
+      Vec2::new(-w / 2.0, sh),
+      Vec2::new(-w / 2.0, -sh),
+      ],
     rescue_goal: 20.into(),
-    time_goal: Duration::from_secs(60).into(),
+    time_goal: Duration::from_secs(120).into(),
     wander: false,
   };
   lvl
