@@ -24,7 +24,7 @@ mod splash;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-//mod audio;
+// mod audio;
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
@@ -36,7 +36,7 @@ fn main() {
   let mut app = App::new();
   app
     .insert_resource(ClearColor(Color::BLACK))
-    .add_plugins(DefaultPlugins)
+    .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
     .add_plugins((utils::text::TextAnimationPlugin, utils::music::MusicPlugin))
     .add_plugins(HanabiPlugin)
     .add_state::<AppState>()
