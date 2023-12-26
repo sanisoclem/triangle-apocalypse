@@ -75,7 +75,7 @@ impl From<&str> for SplashLog {
 }
 
 fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-  let icon = asset_server.load("preload/Triangle Apocalypse.png");
+  let icon = asset_server.load("preload/TriangleApocalypse.png");
   let mut cam = Camera2dBundle {
     camera: Camera {
       hdr: true, // 1. HDR is required for bloom
@@ -286,14 +286,14 @@ pub fn build_bg(
   let indices = vec![0, 2, 1, 2, 0, 3];
   mesh.set_indices(Some(Indices::U32(indices)));
 
-  commands
-    .spawn(MaterialMesh2dBundle {
-      mesh: Mesh2dHandle(meshes.add(mesh)),
-      material: materials.add(SplashMaterial {}),
-      transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
-      ..default()
-    })
-    .insert(OnSplashScreen);
+  // commands
+  //   .spawn(MaterialMesh2dBundle {
+  //     mesh: Mesh2dHandle(meshes.add(mesh)),
+  //     material: materials.add(SplashMaterial {}),
+  //     transform: Transform::from_translation(Vec3::new(0.0, 0.0, -100.)),
+  //     ..default()
+  //   })
+  //   .insert(OnSplashScreen);
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
