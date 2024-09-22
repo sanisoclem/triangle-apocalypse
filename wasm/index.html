@@ -27,28 +27,28 @@
       };
     </script>
   </head>
-  <body>
-    <div class="flex justify-center items-center bg-black h-[calc(100vh-64px)]">
+  <body class="w-full">
+    <div class="flex bg-gray-800 justify-center items-center bg-black h-[calc(100vh-64px)] w-full">
       <canvas
         class="bg-gray-800 h-[calc(100vh-64px)]"
         id="main-canvas"
       ></canvas>
       <button
         id="start"
-        class="absolute text-sun-950 bg-sun-100 rounded px-4 py-1 font-semibold hover:text-white hover:bg-sun-800 transition-colors"
+        class="absolute text-sun-950 bg-sun-100 rounded px-4 py-1 font-semibold enabled:hover:text-white enabled:hover:bg-sun-800 transition-colors disabled:bg-transparent disabled:text-white"
       >
         Start Game
       </button>
     </div>
     <div
-      class="bg-gray-800 text-white self-end justify-self-end w-full px-8 py-4 flex flex-col md:flex-row gap-x-20 text-center md:text-left gap-y-8 text-xs justify-between"
+      class="bg-gray-800 text-white w-full px-8 py-4 flex flex-col md:flex-row gap-x-20 text-center md:text-left gap-y-8 text-xs justify-between"
     >
       <div class="flex justify-center flex-col">
         <p>
           This was made with
           <a class="hover:text-amber-500 bg-white bg-opacity-10 px-1" href="https://bevyengine.org/">bevy</a>
           and was my entry to
-          <a class="hover:text-amber-500 bg-white bg-opacity-10 px-1 " href="https://itch.io/jam/bevy-jam-4"
+          <a class="hover:text-amber-500 bg-white bg-opacity-10 px-1 " href="https://itch.io/jam/bevy-jam-4/rate/2416852"
             >bevy jam 4</a
           >, and is hosted by
           <a class="hover:text-amber-500 bg-white bg-opacity-10 px-1" href="https://vercel.com/">Vercel</a>
@@ -93,6 +93,28 @@
   </body>
   <script type="module">
     import init, { main_wasm } from "./target/jam4.js";
+    
+    var isChromium = window.chrome;
+    var winNav = window.navigator;
+    var vendorName = winNav.vendor;
+    var isOpera = typeof window.opr !== "undefined";
+    var isFirefox = winNav.userAgent.indexOf("Firefox") > -1;
+    var isIEedge = winNav.userAgent.indexOf("Edg") > -1;
+    var isIOSChrome = winNav.userAgent.match("CriOS");
+    var isGoogleChrome = (typeof winNav.userAgentData !== "undefined") ? winNav.userAgentData.brands[2].brand === "Google Chrome" :  vendorName === "Google Inc.";
+
+    if (isIOSChrome) {
+      document.getElementById("start").innerText = "Sorry, this only works using google chrome";
+    } else if(
+      isChromium !== null &&
+      typeof isChromium !== "undefined"
+    ) {
+      
+    } else { 
+      document.getElementById("start").innerText = "Sorry, this only works on chromium browsers";
+      document.getElementById("start").disabled = true;
+    }
+    
     document.getElementById("start").onclick = async () => {
       setTimeout(() => {
         document.getElementById("start").remove();
