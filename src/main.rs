@@ -36,7 +36,13 @@ fn main() {
   let mut app = App::new();
   app
     .insert_resource(ClearColor(Color::BLACK))
-    .add_plugins(DefaultPlugins)
+    .add_plugins(DefaultPlugins.set(WindowPlugin {
+      primary_window: Some(Window {
+        canvas: Some("#main-canvas".into()),
+        ..default()
+      }),
+      ..default()
+    }))
     .add_plugins((utils::text::TextAnimationPlugin, utils::music::MusicPlugin))
     .add_plugins(HanabiPlugin)
     .add_state::<AppState>()
