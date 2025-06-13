@@ -59,7 +59,7 @@
         <ul class="flex justify-center gap-x-4 md:gap-x-8">
           <li>
             <a
-              href="https://github.com/sanisoclem/sfxr-web"
+              href="https://github.com/sanisoclem/triangle-apocalypse"
               class="hover:text-amber-500 flex gap-x-2"
             >
               <svg class="h-8 w-8 fill-current" viewBox="3 3 18 18">
@@ -93,7 +93,7 @@
   </body>
   <script type="module">
     import init, { main_wasm } from "./target/jam4.js";
-    
+
     var isChromium = window.chrome;
     var winNav = window.navigator;
     var vendorName = winNav.vendor;
@@ -109,12 +109,12 @@
       isChromium !== null &&
       typeof isChromium !== "undefined"
     ) {
-      
-    } else { 
+
+    } else {
       document.getElementById("start").innerText = "Sorry, this only works on chromium browsers";
       document.getElementById("start").disabled = true;
     }
-    
+
     document.getElementById("start").onclick = async () => {
       setTimeout(() => {
         document.getElementById("start").remove();
